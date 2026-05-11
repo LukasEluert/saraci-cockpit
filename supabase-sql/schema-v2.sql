@@ -38,6 +38,9 @@ ALTER TABLE public.tasks
 ALTER TABLE public.tasks
   ADD COLUMN IF NOT EXISTS "nächste_fälligkeit" date;
 
+ALTER TABLE public.tasks
+  ADD COLUMN IF NOT EXISTS prioritaet integer;
+
 -- Legacy-Spalte bereich (text) → bereich_id (falls vorhanden)
 DO $$
 BEGIN

@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddForm, type AddTaskPayload } from "@/components/AddForm";
 import { DataExportButtons } from "@/components/DataExportButtons";
+import { KiImportModal } from "@/components/KiImportModal";
 import { LogoutButton } from "@/components/LogoutButton";
 import { SaraciLogo } from "@/components/SaraciLogo";
 import { TaskItem } from "@/components/TaskItem";
 import { DEADLINE_ORDER } from "@/lib/constants";
+import { parseKiTaskImportJson } from "@/lib/kiTaskImport";
 import { buildLeitfadenExport } from "@/lib/exportGuide";
 import { getSupabase } from "@/lib/supabase";
 import { computeNextFälligkeit, todayYmd } from "@/lib/recurrence";
@@ -29,8 +31,16 @@ function formatDatumMobileHeader(d: Date): string {
   return `${wd} ${v("day")}.${v("month")}`;
 }
 
+function prioritySortKey(p: number | null | undefined): number {
+  if (p === null || p === undefined) return 1_000_000_000;
+  return p;
+}
+
 function sortOpenTasks(list: Task[]): Task[] {
   return [...list].sort((a, b) => {
+    const pa = prioritySortKey(a.prioritaet);
+    const pb = prioritySortKey(b.prioritaet);
+    if (pa !== pb) return pa - pb;
     const ra = DEADLINE_ORDER[a.deadline || ""] ?? 99;
     const rb = DEADLINE_ORDER[b.deadline || ""] ?? 99;
     if (ra !== rb) return ra - rb;
@@ -91,11 +101,20 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [copyNotice, setCopyNotice] = useState(false);
   const [dateTick, setDateTick] = useState(0);
+  const [kiImportOpen, setKiImportOpen] = useState(false);
+  const [kiImportNotice, setKiImportNotice] = useState<string | null>(null);
+  const [openListFilter, setOpenListFilter] = useState<"all" | "heute">("all");
 
   useEffect(() => {
     const id = window.setInterval(() => setDateTick((n) => n + 1), 60_000);
     return () => window.clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (!kiImportNotice) return;
+    const id = window.setTimeout(() => setKiImportNotice(null), 5000);
+    return () => window.clearTimeout(id);
+  }, [kiImportNotice]);
 
   const datumMobile = useMemo(
     () => formatDatumMobileHeader(new Date()),
@@ -149,10 +168,18 @@ export default function Home() {
     });
   }, [bootstrap]);
 
-  const openTasks = useMemo(
+  const sortedOpenTasks = useMemo(
     () => sortOpenTasks(tasks.filter((t) => !t.done)),
     [tasks]
   );
+  const openTasks = useMemo(() => {
+    if (openListFilter === "heute") {
+      return sortedOpenTasks.filter(
+        (t) => (t.deadline?.trim() || "") === "Heute"
+      );
+    }
+    return sortedOpenTasks;
+  }, [sortedOpenTasks, openListFilter]);
   const doneTasks = useMemo(
     () =>
       tasks
@@ -185,6 +212,7 @@ export default function Home() {
         text: payload.text,
         bereich_id: payload.bereich_id,
         deadline: payload.deadline,
+        prioritaet: null,
         done: false,
         notiz: null,
         wiederkehrend: payload.wiederkehrend,
@@ -222,6 +250,7 @@ export default function Home() {
           text: task.text,
           bereich_id: task.bereich_id,
           deadline: task.deadline,
+          prioritaet: task.prioritaet ?? null,
           done: false,
           notiz: null,
           wiederkehrend: true,
@@ -309,7 +338,47 @@ export default function Home() {
     }
   }
 
+  async function runKiImport(json: string) {
+    const { ok: rows, error: parseErr } = parseKiTaskImportJson(json);
+    if (parseErr) throw new Error(parseErr);
+    if (rows.length === 0) throw new Error("Liste ist leer.");
+    await runWithSync(async () => {
+      const sb = getSupabase();
+      const now = new Date().toISOString();
+      let count = 0;
+      for (const r of rows) {
+        const { data, error: uErr } = await sb
+          .from("tasks")
+          .update({
+            deadline: r.deadline,
+            prioritaet: r.prioritaet,
+            updated_at: now,
+          })
+          .eq("id", r.id)
+          .select("id");
+        if (uErr) throw new Error(uErr.message);
+        if (data && data.length > 0) count += 1;
+      }
+      setTasks((prev) =>
+        prev.map((t) => {
+          const u = rows.find((row) => row.id === t.id);
+          if (!u) return t;
+          return {
+            ...t,
+            deadline: u.deadline,
+            prioritaet: u.prioritaet,
+            updated_at: now,
+          };
+        })
+      );
+      setKiImportNotice(`${count} Tasks aktualisiert`);
+    });
+  }
+
   const busy = sync === "syncing";
+
+  const kiImportBtnClass =
+    "tap-scale rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40";
 
   return (
     <div className="flex min-h-0 w-full max-w-full flex-col overflow-x-hidden">
@@ -352,7 +421,17 @@ export default function Home() {
                 <LogoutButton />
                 <SyncDot status={sync} />
               </div>
-              <DataExportButtons disabled={busy} />
+              <div className="flex max-w-full flex-col items-end gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                <DataExportButtons disabled={busy} />
+                <button
+                  type="button"
+                  onClick={() => setKiImportOpen(true)}
+                  disabled={busy}
+                  className={kiImportBtnClass}
+                >
+                  KI-Import
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -363,6 +442,14 @@ export default function Home() {
           {error ? (
             <p className="shrink-0 rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
               {error}
+            </p>
+          ) : null}
+          {kiImportNotice ? (
+            <p
+              className="shrink-0 rounded-lg border border-[#166534]/50 bg-[#0f1f14] px-3 py-2 font-mono text-[12px] text-[#86efac]"
+              role="status"
+            >
+              {kiImportNotice}
             </p>
           ) : null}
 
@@ -399,13 +486,49 @@ export default function Home() {
 
           <div className="flex min-w-0 flex-col overflow-x-hidden max-md:pb-2">
             <section className="min-w-0 shrink-0">
-              <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-                Offen
-              </h2>
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+                <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+                  Offen
+                </h2>
+                <div
+                  className="flex shrink-0 rounded-lg border border-[#333333] bg-[#0a0a0a] p-0.5"
+                  role="group"
+                  aria-label="Liste filtern"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenListFilter("all")}
+                    aria-pressed={openListFilter === "all"}
+                    className={[
+                      "tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
+                      openListFilter === "all"
+                        ? "bg-[#222222] text-neutral-100"
+                        : "text-neutral-500 hover:text-neutral-300",
+                    ].join(" ")}
+                  >
+                    Alle
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOpenListFilter("heute")}
+                    aria-pressed={openListFilter === "heute"}
+                    className={[
+                      "tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
+                      openListFilter === "heute"
+                        ? "bg-[#222222] text-[#f87171]"
+                        : "text-neutral-500 hover:text-neutral-300",
+                    ].join(" ")}
+                  >
+                    Heute
+                  </button>
+                </div>
+              </div>
               <div className="mt-3 flex min-w-0 flex-col gap-2">
                 {openTasks.length === 0 ? (
                   <p className="rounded-lg border border-dashed border-[#333333] px-3 py-6 text-center font-sans text-sm text-neutral-500">
-                    Nichts Offenes — gute Arbeit.
+                    {openListFilter === "heute" && sortedOpenTasks.length > 0
+                      ? "Keine offenen Tasks mit Deadline „Heute“."
+                      : "Nichts Offenes — gute Arbeit."}
                   </p>
                 ) : (
                   openTasks.map((t) => (
@@ -484,18 +607,35 @@ export default function Home() {
               Kopiert strukturierten Text für z. B. Claude (Markdown-Abschnitte,
               Bereiche, Checkboxen).
             </p>
-            <button
-              type="button"
-              onClick={handleExportCopy}
-              disabled={busy}
-              className="tap-scale mt-4 w-full max-h-11 rounded-lg border border-[#e63030]/50 bg-[#1a1a1a] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-neutral-100 transition-colors hover:border-[#e63030] hover:bg-[#222222] hover:text-white disabled:opacity-40"
-            >
-              {copyNotice ? "In Zwischenablage kopiert" : "Text kopieren"}
-            </button>
+            <div className="mt-4 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={handleExportCopy}
+                disabled={busy}
+                className="tap-scale w-full max-h-11 rounded-lg border border-[#e63030]/50 bg-[#1a1a1a] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-neutral-100 transition-colors hover:border-[#e63030] hover:bg-[#222222] hover:text-white disabled:opacity-40"
+              >
+                {copyNotice ? "In Zwischenablage kopiert" : "Text kopieren"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setKiImportOpen(true)}
+                disabled={busy}
+                className="tap-scale w-full max-h-11 rounded-lg border border-[#333333] bg-[#0a0a0a] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40"
+              >
+                KI-Import
+              </button>
+            </div>
             </section>
           </div>
         </div>
       </div>
+
+      <KiImportModal
+        open={kiImportOpen}
+        onClose={() => setKiImportOpen(false)}
+        disabled={busy}
+        onImport={runKiImport}
+      />
     </div>
   );
 }

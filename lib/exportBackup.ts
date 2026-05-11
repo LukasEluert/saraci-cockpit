@@ -11,6 +11,7 @@ const CSV_COLUMNS = [
   "bereich_id",
   "bereich_name",
   "deadline",
+  "prioritaet",
   "done",
   "notiz",
   "wiederkehrend",

@@ -15,6 +15,8 @@ export interface Task {
   text: string;
   bereich_id: string;
   deadline: string;
+  /** KI-Import / Sortierung; fehlend in älteren Zeilen = behandelt wie null */
+  prioritaet?: number | null;
   done: boolean;
   notiz: string | null;
   wiederkehrend: boolean;
