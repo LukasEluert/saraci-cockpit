@@ -182,7 +182,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="flex h-full min-h-0 w-full max-w-full min-w-0 flex-col overflow-y-auto overflow-x-hidden bg-[#0a0a0a] text-neutral-100">
+    <div className="flex w-full min-w-0 max-w-full flex-col overflow-x-hidden bg-[#0a0a0a] text-neutral-100 max-md:min-h-0 md:h-full md:min-h-0 md:flex-1 md:flex-col md:overflow-hidden">
       <header className="flex shrink-0 items-center justify-between gap-2 border-b border-[#222222] bg-[#111111] px-[max(0.25rem,env(safe-area-inset-left))] py-1 pr-[max(0.25rem,env(safe-area-inset-right))]">
         <div className="min-w-0">
           <h1 className="truncate font-sans text-[clamp(0.85rem,2vmin,1.1rem)] font-semibold tracking-tight">
@@ -210,8 +210,8 @@ export default function DashboardPage() {
         </p>
       ) : null}
 
-      <div className="min-h-0 flex-[2] overflow-hidden p-0">
-        <div className="grid h-full min-h-0 grid-cols-2 gap-px md:grid-cols-4">
+      <div className="p-0 max-md:w-full md:min-h-0 md:flex-[2] md:overflow-hidden">
+        <div className="grid grid-cols-2 gap-px max-md:auto-rows-fr md:h-full md:min-h-0 md:grid-cols-4">
           <Kpi value={loading ? "—" : taskKpis.offenGesamt} label="Offen gesamt" />
           <Kpi value={loading ? "—" : taskKpis.heuteFaellig} label="Heute fällig" />
           <Kpi
@@ -230,11 +230,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <section className="flex min-h-0 flex-[1.1] flex-col overflow-hidden border-t border-[#222222] px-0 py-0">
+      <section className="border-t border-[#222222] px-0 py-0 max-md:w-full md:flex md:min-h-0 md:flex-[1.1] md:flex-col md:overflow-hidden">
         <h2 className="shrink-0 px-1 font-mono text-[clamp(0.55rem,1vmin,0.7rem)] uppercase tracking-wide text-neutral-500">
           Offen heute &amp; überfällig
         </h2>
-        <ul className="mt-0.5 min-h-0 flex-1 space-y-0.5 overflow-hidden px-1">
+        <ul className="mt-0.5 space-y-0.5 px-1 max-md:max-h-none max-md:overflow-visible md:min-h-0 md:flex-1 md:overflow-hidden">
           {heuteListe.length === 0 ? (
             <li className="font-sans text-[clamp(0.65rem,1.2vmin,0.8rem)] text-neutral-500">
               Keine Einträge.
@@ -266,12 +266,12 @@ export default function DashboardPage() {
         </ul>
       </section>
 
-      <div className="grid min-h-0 flex-[1.8] grid-cols-2 gap-px overflow-hidden border-t border-[#222222] p-0">
-        <section className="flex min-h-0 flex-col overflow-hidden border-r border-[#222222] bg-[#111111] px-1 py-1">
+      <div className="grid grid-cols-2 gap-px border-t border-[#222222] p-0 max-md:w-full md:min-h-0 md:flex-[1.8] md:overflow-hidden">
+        <section className="border-r border-[#222222] bg-[#111111] px-1 py-1 max-md:min-h-0 md:flex md:min-h-0 md:flex-col md:overflow-hidden">
           <h2 className="shrink-0 font-mono text-[clamp(0.55rem,1vmin,0.7rem)] uppercase tracking-wide text-neutral-500">
             Letzte Akquise
           </h2>
-          <ul className="mt-1 min-h-0 flex-1 space-y-1 overflow-hidden">
+          <ul className="mt-1 space-y-1 max-md:overflow-visible md:min-h-0 md:flex-1 md:overflow-hidden">
             {akquiseKpis.last5.length === 0 ? (
               <li className="text-[clamp(0.6rem,1.1vmin,0.75rem)] text-neutral-500">
                 —
@@ -294,11 +294,11 @@ export default function DashboardPage() {
           </ul>
         </section>
 
-        <section className="flex min-h-0 flex-col overflow-hidden bg-[#111111] px-1 py-1 md:px-1.5">
+        <section className="bg-[#111111] px-1 py-1 max-md:min-h-0 md:flex md:min-h-0 md:flex-col md:overflow-hidden md:px-1.5">
           <h2 className="shrink-0 font-mono text-[clamp(0.55rem,1vmin,0.7rem)] uppercase tracking-wide text-neutral-500">
             Aktive Projekte
           </h2>
-          <ul className="mt-1 min-h-0 flex-1 space-y-1 overflow-hidden">
+          <ul className="mt-1 space-y-1 max-md:overflow-visible md:min-h-0 md:flex-1 md:overflow-hidden">
             {projektKpis.aktiv.length === 0 ? (
               <li className="text-[clamp(0.6rem,1.1vmin,0.75rem)] text-neutral-500">
                 —

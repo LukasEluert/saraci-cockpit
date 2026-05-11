@@ -33,13 +33,25 @@ body {
 
 /* Mobile (unter 768px): kein seitlicher Overflow, Formularfelder nutzen die volle Breite */
 @media (max-width: 767px) {
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
-  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="color"]),
+  select {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    max-height: 44px;
+  }
+
   textarea {
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
     min-width: 0;
+  }
+
+  input[type="color"] {
+    box-sizing: border-box;
+    max-height: 44px;
   }
 }
 

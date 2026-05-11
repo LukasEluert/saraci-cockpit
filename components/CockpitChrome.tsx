@@ -60,7 +60,7 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
   }
 
   return (
-    <nav className="flex max-w-full items-stretch justify-between gap-0.5 px-0.5">
+    <nav className="flex w-full max-w-full items-stretch justify-evenly gap-0 px-1">
       {NAV.map(({ href, label, Icon }) => {
         const active = isActive(pathname, href);
         return (
@@ -68,7 +68,7 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
             key={href}
             href={href}
             className={[
-              "tap-scale flex min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 font-mono text-[11px] uppercase leading-none tracking-wide transition-colors duration-150",
+              "tap-scale flex min-h-[44px] min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 font-mono text-[10px] uppercase leading-none tracking-wide transition-colors duration-150 sm:text-[11px]",
               active ? "text-[#e63030]" : "text-[#666666]",
             ].join(" ")}
           >
@@ -96,12 +96,12 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] md:min-h-[100dvh] md:overflow-y-auto md:pb-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain pb-[calc(100px+env(safe-area-inset-bottom))] max-md:min-h-0 md:min-h-[100dvh] md:overflow-y-auto md:pb-0">
         {children}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-40 min-h-[64px] border-t border-[#222222] bg-[#111111]/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-[12px] md:hidden">
-        <div className="flex h-full min-h-[64px] max-w-full items-center">
+        <div className="flex h-full min-h-[64px] w-full max-w-full items-stretch">
           <CockpitNavLinks variant="bottom" />
         </div>
       </div>

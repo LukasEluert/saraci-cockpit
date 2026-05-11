@@ -308,8 +308,8 @@ export default function Home() {
   const busy = sync === "syncing";
 
   return (
-    <div className="flex h-full min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden md:min-h-[100dvh] md:overflow-visible">
-      <header className="shrink-0 border-t-2 border-[#e63030] bg-[#0a0a0a]">
+    <div className="flex w-full max-w-full flex-col max-md:min-h-0 md:h-full md:min-h-0 md:flex-1 md:overflow-hidden">
+      <header className="shrink-0 bg-[#0a0a0a]">
         <div className="border-b border-[#222222] pt-[env(safe-area-inset-top)] md:hidden">
           <div className="flex h-14 max-w-full items-center gap-1.5 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
             <SaraciLogo
@@ -354,7 +354,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pb-3 pt-3 md:block md:overflow-visible md:px-[max(1rem,env(safe-area-inset-left))] md:pb-8 md:pr-[max(1rem,env(safe-area-inset-right))] md:pt-0">
+      <div className="flex min-h-0 flex-col overflow-x-hidden px-[max(0.75rem,env(safe-area-inset-left))] pb-4 pr-[max(0.75rem,env(safe-area-inset-right))] pt-3 max-md:flex-none max-md:overflow-y-visible md:flex-1 md:overflow-y-auto md:px-[max(1rem,env(safe-area-inset-left))] md:pb-8 md:pr-[max(1rem,env(safe-area-inset-right))] md:pt-0">
         <div className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-4 md:max-w-lg md:gap-8">
           {error ? (
             <p className="shrink-0 rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
@@ -393,7 +393,7 @@ export default function Home() {
             <AddForm bereiche={bereiche} disabled={busy} onAdd={handleAdd} />
           </div>
 
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto max-md:flex-1 md:overflow-visible">
+          <div className="flex min-w-0 flex-col overflow-x-hidden max-md:pb-2 md:min-h-0 md:flex-1 md:overflow-y-auto md:overflow-x-hidden">
             <section className="min-w-0 shrink-0">
               <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
                 Offen
@@ -466,11 +466,11 @@ export default function Home() {
             </details>
             </section>
 
-            <section className="mt-4 min-w-0 shrink-0 rounded-xl border border-[#222222] bg-[#111111] p-4">
-            <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+            <section className="mt-4 min-w-0 shrink-0 rounded-xl border border-[#333333] bg-[#141414] p-4 max-md:mb-2">
+            <h2 className="font-mono text-[11px] font-medium uppercase tracking-wide text-neutral-200">
               Export für Leitfaden
             </h2>
-            <p className="mt-2 font-sans text-sm leading-relaxed text-neutral-400">
+            <p className="mt-2 font-sans text-sm leading-relaxed text-neutral-300">
               Kopiert strukturierten Text für z. B. Claude (Markdown-Abschnitte,
               Bereiche, Checkboxen).
             </p>
@@ -478,7 +478,7 @@ export default function Home() {
               type="button"
               onClick={handleExportCopy}
               disabled={busy}
-              className="tap-scale mt-4 w-full rounded-lg border border-[#333333] bg-[#0a0a0a] px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40"
+              className="tap-scale mt-4 w-full max-h-11 rounded-lg border border-[#e63030]/50 bg-[#1a1a1a] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-neutral-100 transition-colors hover:border-[#e63030] hover:bg-[#222222] hover:text-white disabled:opacity-40"
             >
               {copyNotice ? "In Zwischenablage kopiert" : "Text kopieren"}
             </button>

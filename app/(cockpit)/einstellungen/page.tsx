@@ -121,7 +121,7 @@ export default function EinstellungenPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-[#0a0a0a] px-[max(1rem,env(safe-area-inset-left))] pb-[calc(5rem+env(safe-area-inset-bottom))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] md:min-h-[100dvh] md:pb-8">
+    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-[#0a0a0a] px-[max(1rem,env(safe-area-inset-left))] pb-3 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] max-md:pb-4 md:min-h-[100dvh] md:pb-8">
       <div className="mx-auto w-full min-w-0 max-w-lg space-y-8">
         <header>
           <h1 className="font-sans text-xl font-medium tracking-tight text-neutral-100">
@@ -154,7 +154,7 @@ export default function EinstellungenPage() {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 disabled={busy}
-                className="mt-1 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                className="mt-1 max-h-11 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
               />
             </label>
             <label className="block">
@@ -167,14 +167,14 @@ export default function EinstellungenPage() {
                   value={newFarbe.length === 7 ? newFarbe : "#e63030"}
                   onChange={(e) => setNewFarbe(e.target.value)}
                   disabled={busy}
-                  className="h-10 w-12 max-h-10 max-w-[40px] cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] disabled:opacity-50 md:max-h-none md:max-w-none"
+                  className="box-border h-9 w-9 shrink-0 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] disabled:opacity-50 md:h-10 md:w-12"
                 />
                 <input
                   value={newFarbe}
                   onChange={(e) => setNewFarbe(e.target.value)}
                   disabled={busy}
                   placeholder="#e63030"
-                  className="min-w-0 flex-1 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-mono text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                  className="min-w-0 max-h-11 flex-1 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-mono text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
                 />
               </div>
             </label>
@@ -241,34 +241,36 @@ function BereichEditorRow({
 
   return (
     <li className="rounded-lg border border-[#222222] bg-[#111111] px-2 py-1.5 md:p-3">
-      <div className="flex items-center gap-2 md:hidden">
-        <input
-          type="color"
-          value={colorValue}
-          onChange={(e) => setFarbe(e.target.value)}
-          disabled={busy}
-          aria-label="Farbe"
-          className="h-10 w-10 max-h-[40px] max-w-[40px] shrink-0 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] p-0 disabled:opacity-50"
-        />
+      <div className="flex items-center justify-between gap-2 md:hidden">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={busy}
           placeholder="Name"
-          className="min-w-0 flex-1 rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-1.5 font-sans text-sm text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+          className="min-h-0 min-w-0 max-h-11 flex-1 rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-2 font-sans text-sm text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
         />
-        <BereichIconButton
-          label="Speichern"
-          disabled={busy || !dirty}
-          onClick={() => onSave(row, name, farbe)}
-          variant="save"
-        />
-        <BereichIconButton
-          label="Löschen"
-          disabled={busy}
-          onClick={() => void onDelete(row)}
-          variant="delete"
-        />
+        <div className="flex shrink-0 items-center gap-1">
+          <input
+            type="color"
+            value={colorValue}
+            onChange={(e) => setFarbe(e.target.value)}
+            disabled={busy}
+            aria-label="Farbe"
+            className="box-border h-9 w-9 shrink-0 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] p-0 disabled:opacity-50"
+          />
+          <BereichIconButton
+            label="Speichern"
+            disabled={busy || !dirty}
+            onClick={() => onSave(row, name, farbe)}
+            variant="save"
+          />
+          <BereichIconButton
+            label="Löschen"
+            disabled={busy}
+            onClick={() => void onDelete(row)}
+            variant="delete"
+          />
+        </div>
       </div>
 
       <div className="hidden md:block">
@@ -346,7 +348,7 @@ function BereichIconButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="tap-scale flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#333333] text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40"
+      className="tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#333333] text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40 md:h-10 md:w-10"
     >
       {variant === "save" ? (
         <svg
