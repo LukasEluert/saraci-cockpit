@@ -1,30 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  BEREICHE,
   DEADLINES,
-  type Bereich,
+  WIEDERHOLUNGEN,
   type Deadline,
 } from "@/lib/constants";
+import type { BereichRow, Wiederholung } from "@/lib/types";
 
-type Props = {
-  disabled?: boolean;
-  onAdd: (payload: { text: string; bereich: Bereich; deadline: Deadline }) => void;
+export type AddTaskPayload = {
+  text: string;
+  bereich_id: string;
+  deadline: Deadline;
+  wiederkehrend: boolean;
+  wiederholung: Wiederholung | null;
 };
 
-export function AddForm({ disabled, onAdd }: Props) {
+type Props = {
+  bereiche: BereichRow[];
+  disabled?: boolean;
+  onAdd: (payload: AddTaskPayload) => void;
+};
+
+export function AddForm({ bereiche, disabled, onAdd }: Props) {
   const [text, setText] = useState("");
-  const [bereich, setBereich] = useState<Bereich>("Akquise");
+  const [bereichId, setBereichId] = useState("");
   const [deadline, setDeadline] = useState<Deadline>("Kein Datum");
+  const [wiederkehrend, setWiederkehrend] = useState(false);
+  const [wiederholung, setWiederholung] = useState<Wiederholung>("wöchentlich");
+
+  useEffect(() => {
+    if (!bereichId && bereiche.length > 0) {
+      setBereichId(bereiche[0].id);
+    }
+    if (
+      bereichId &&
+      bereiche.length > 0 &&
+      !bereiche.some((b) => b.id === bereichId)
+    ) {
+      setBereichId(bereiche[0].id);
+    }
+  }, [bereiche, bereichId]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const t = text.trim();
-    if (!t) return;
-    onAdd({ text: t, bereich, deadline });
+    if (!t || !bereichId) return;
+    onAdd({
+      text: t,
+      bereich_id: bereichId,
+      deadline,
+      wiederkehrend,
+      wiederholung: wiederkehrend ? wiederholung : null,
+    });
     setText("");
+    setWiederkehrend(false);
+    setWiederholung("wöchentlich");
   }
+
+  const bereichOptions =
+    bereiche.length === 0 ? (
+      <option value="">Keine Bereiche</option>
+    ) : (
+      bereiche.map((b) => (
+        <option key={b.id} value={b.id}>
+          {b.name}
+        </option>
+      ))
+    );
 
   return (
     <form
@@ -50,16 +93,12 @@ export function AddForm({ disabled, onAdd }: Props) {
             Bereich
           </span>
           <select
-            value={bereich}
-            onChange={(e) => setBereich(e.target.value as Bereich)}
-            disabled={disabled}
+            value={bereichId}
+            onChange={(e) => setBereichId(e.target.value)}
+            disabled={disabled || bereiche.length === 0}
             className="mt-2 w-full appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2.5 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
           >
-            {BEREICHE.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
+            {bereichOptions}
           </select>
         </label>
         <label className="block">
@@ -80,10 +119,47 @@ export function AddForm({ disabled, onAdd }: Props) {
           </select>
         </label>
       </div>
+
+      <div className="mt-4 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-3">
+        <label className="flex cursor-pointer items-center gap-3">
+          <input
+            type="checkbox"
+            checked={wiederkehrend}
+            onChange={(e) => setWiederkehrend(e.target.checked)}
+            disabled={disabled}
+            className="h-4 w-4 rounded border-[#404040] bg-[#111111] text-[#e63030] focus:ring-[#e63030]"
+          />
+          <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-400">
+            Wiederkehrend
+          </span>
+        </label>
+        {wiederkehrend ? (
+          <label className="mt-3 block">
+            <span className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">
+              Intervall
+            </span>
+            <select
+              value={wiederholung}
+              onChange={(e) =>
+                setWiederholung(e.target.value as Wiederholung)
+              }
+              disabled={disabled}
+              className="mt-1.5 w-full appearance-none rounded-lg border border-[#222222] bg-[#111111] px-3 py-2 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+            >
+              {WIEDERHOLUNGEN.map((w) => (
+                <option key={w} value={w}>
+                  {w}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+      </div>
+
       <div className="mt-4 flex justify-end">
         <button
           type="submit"
-          disabled={disabled || !text.trim()}
+          disabled={disabled || !text.trim() || !bereichId}
           className="rounded-lg bg-[#e63030] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-white transition-colors hover:bg-[#c92828] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Hinzufügen

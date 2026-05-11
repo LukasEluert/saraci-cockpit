@@ -1,18 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AddForm } from "@/components/AddForm";
+import { AddForm, type AddTaskPayload } from "@/components/AddForm";
 import { DataExportButtons } from "@/components/DataExportButtons";
 import { LogoutButton } from "@/components/LogoutButton";
 import { TaskItem } from "@/components/TaskItem";
-import {
-  DEADLINE_ORDER,
-  type Bereich,
-  type Deadline,
-} from "@/lib/constants";
+import { DEADLINE_ORDER } from "@/lib/constants";
 import { buildLeitfadenExport } from "@/lib/exportGuide";
 import { getSupabase } from "@/lib/supabase";
-import type { Task } from "@/lib/types";
+import { computeNextFälligkeit, todayYmd } from "@/lib/recurrence";
+import { ensureDefaultBereiche } from "@/lib/seedBereiche";
+import { TASKS_LIST_SELECT } from "@/lib/taskSelect";
+import type { BereichRow, Task, Wiederholung } from "@/lib/types";
 
 type SyncState = "ok" | "syncing" | "error";
 
@@ -59,6 +58,7 @@ function SyncDot({ status }: { status: SyncState }) {
 }
 
 export default function Home() {
+  const [bereiche, setBereiche] = useState<BereichRow[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [sync, setSync] = useState<SyncState>("syncing");
   const [error, setError] = useState<string | null>(null);
@@ -78,25 +78,38 @@ export default function Home() {
     }
   }, []);
 
-  const loadTasks = useCallback(async () => {
-    await runWithSync(async () => {
+  const bootstrap = useCallback(async () => {
+    setSync("syncing");
+    setError(null);
+    try {
       const sb = getSupabase();
-      const { data, error: qErr } = await sb
-        .from("tasks")
+      await ensureDefaultBereiche(sb);
+      const { data: b, error: bErr } = await sb
+        .from("bereiche")
         .select("*")
+        .order("name");
+      if (bErr) throw new Error(bErr.message);
+      setBereiche((b as BereichRow[]) ?? []);
+      const { data: t, error: tErr } = await sb
+        .from("tasks")
+        .select(TASKS_LIST_SELECT)
         .order("created_at", { ascending: false });
-      if (qErr) throw new Error(qErr.message);
-      setTasks((data as Task[]) ?? []);
-    }).catch(() => {
+      if (tErr) throw new Error(tErr.message);
+      setTasks((t as Task[]) ?? []);
+      setSync("ok");
+    } catch (e) {
+      setSync("error");
+      const msg = e instanceof Error ? e.message : "Unbekannter Fehler";
+      setError(msg);
       setTasks([]);
-    });
-  }, [runWithSync]);
+    }
+  }, []);
 
   useEffect(() => {
     queueMicrotask(() => {
-      void loadTasks();
+      void bootstrap();
     });
-  }, [loadTasks]);
+  }, [bootstrap]);
 
   const openTasks = useMemo(
     () => sortOpenTasks(tasks.filter((t) => !t.done)),
@@ -126,36 +139,77 @@ export default function Home() {
     return { offen: open.length, heute, woche };
   }, [tasks]);
 
-  async function handleAdd(payload: {
-    text: string;
-    bereich: Bereich;
-    deadline: Deadline;
-  }) {
+  async function handleAdd(payload: AddTaskPayload) {
     await runWithSync(async () => {
       const sb = getSupabase();
       const now = new Date().toISOString();
+      const row: Record<string, unknown> = {
+        text: payload.text,
+        bereich_id: payload.bereich_id,
+        deadline: payload.deadline,
+        done: false,
+        notiz: null,
+        wiederkehrend: payload.wiederkehrend,
+        wiederholung: payload.wiederkehrend ? payload.wiederholung : null,
+        nächste_fälligkeit: payload.wiederkehrend ? todayYmd() : null,
+        created_at: now,
+        updated_at: now,
+      };
       const { data, error: insErr } = await sb
         .from("tasks")
-        .insert({
-          text: payload.text,
-          bereich: payload.bereich,
-          deadline: payload.deadline,
-          done: false,
-          created_at: now,
-          updated_at: now,
-        })
-        .select("*")
+        .insert(row)
+        .select(TASKS_LIST_SELECT)
         .single();
       if (insErr) throw new Error(insErr.message);
-      const row = data as Task;
-      setTasks((prev) => [row, ...prev]);
+      setTasks((prev) => [data as Task, ...prev]);
     });
   }
 
   async function handleToggle(task: Task) {
+    const next = !task.done;
+    const w = (task.wiederholung ?? null) as Wiederholung | null;
+
+    if (next && task.wiederkehrend && w) {
+      await runWithSync(async () => {
+        const sb = getSupabase();
+        const now = new Date().toISOString();
+        const { error: uErr } = await sb
+          .from("tasks")
+          .update({ done: true, updated_at: now })
+          .eq("id", task.id);
+        if (uErr) throw new Error(uErr.message);
+        const base = task.nächste_fälligkeit || todayYmd();
+        const nextDue = computeNextFälligkeit(base, w);
+        const insertRow: Record<string, unknown> = {
+          text: task.text,
+          bereich_id: task.bereich_id,
+          deadline: task.deadline,
+          done: false,
+          notiz: null,
+          wiederkehrend: true,
+          wiederholung: w,
+          nächste_fälligkeit: nextDue,
+          created_at: now,
+          updated_at: now,
+        };
+        const { data: created, error: cErr } = await sb
+          .from("tasks")
+          .insert(insertRow)
+          .select(TASKS_LIST_SELECT)
+          .single();
+        if (cErr) throw new Error(cErr.message);
+        setTasks((prev) => {
+          const marked = prev.map((t) =>
+            t.id === task.id ? { ...t, done: true, updated_at: now } : t
+          );
+          return [created as Task, ...marked];
+        });
+      });
+      return;
+    }
+
     await runWithSync(async () => {
       const sb = getSupabase();
-      const next = !task.done;
       const now = new Date().toISOString();
       const { error: uErr } = await sb
         .from("tasks")
@@ -193,6 +247,14 @@ export default function Home() {
     });
   }
 
+  function handleNotizSaved(taskId: string, notiz: string | null) {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId ? { ...t, notiz, updated_at: new Date().toISOString() } : t
+      )
+    );
+  }
+
   async function handleExportCopy() {
     const body = buildLeitfadenExport({ tasks });
     try {
@@ -208,7 +270,7 @@ export default function Home() {
   const busy = sync === "syncing";
 
   return (
-    <div className="min-h-[100dvh] bg-[#0a0a0a] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))]">
+    <div className="min-h-[100dvh] bg-[#0a0a0a] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div className="mx-auto flex w-full max-w-lg flex-col gap-8">
         <header className="flex items-start justify-between gap-4">
           <div>
@@ -261,7 +323,7 @@ export default function Home() {
           </div>
         </section>
 
-        <AddForm disabled={busy} onAdd={handleAdd} />
+        <AddForm bereiche={bereiche} disabled={busy} onAdd={handleAdd} />
 
         <section>
           <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
@@ -279,6 +341,7 @@ export default function Home() {
                   task={t}
                   onToggle={handleToggle}
                   onDelete={handleDelete}
+                  onNotizSaved={handleNotizSaved}
                 />
               ))
             )}
@@ -324,6 +387,7 @@ export default function Home() {
                         task={t}
                         onToggle={handleToggle}
                         onDelete={handleDelete}
+                        onNotizSaved={handleNotizSaved}
                       />
                     ))}
                   </div>

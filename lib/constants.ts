@@ -1,13 +1,4 @@
-export const BEREICHE = [
-  "Akquise",
-  "Laufendes Projekt",
-  "Site Care",
-  "Website",
-  "Admin",
-  "Sonstiges",
-] as const;
-
-export type Bereich = (typeof BEREICHE)[number];
+import type { AkquiseKanal, AkquiseStatus, ProjektStatus, Wiederholung } from "@/lib/types";
 
 export const DEADLINES = [
   "Heute",
@@ -25,23 +16,58 @@ export const DEADLINE_ORDER: Record<string, number> = {
   "Kein Datum": 3,
 };
 
-export function bereichBadgeClass(bereich: string): string {
-  const b = bereich?.trim() || "Sonstiges";
-  switch (b) {
-    case "Akquise":
-      return "bg-[#1e3a5f] text-[#93c5fd] border-[#2563eb]";
-    case "Laufendes Projekt":
-      return "bg-[#14532d] text-[#86efac] border-[#22c55e]";
-    case "Site Care":
-      return "bg-[#451a03] text-[#fcd34d] border-[#d97706]";
-    case "Website":
-      return "bg-[#3b0764] text-[#e9d5ff] border-[#a855f7]";
-    case "Admin":
-      return "bg-[#262626] text-[#d4d4d4] border-[#525252]";
-    case "Sonstiges":
-    default:
-      return "bg-[#1a1a1a] text-[#a3a3a3] border-[#404040]";
+export const WIEDERHOLUNGEN: readonly Wiederholung[] = [
+  "täglich",
+  "wöchentlich",
+  "monatlich",
+];
+
+export const AKQUISE_KANAELE: readonly AkquiseKanal[] = [
+  "E-Mail",
+  "LinkedIn",
+  "Post",
+  "Telefon",
+  "Persönlich",
+];
+
+export const AKQUISE_STATUS: readonly AkquiseStatus[] = [
+  "Gesendet",
+  "Antwort erhalten",
+  "Termin vereinbart",
+  "Abgesagt",
+  "In Verhandlung",
+];
+
+export const PROJEKT_STATUS: readonly ProjektStatus[] = [
+  "Angebot",
+  "In Arbeit",
+  "Abrechnung",
+  "Abgeschlossen",
+  "Pausiert",
+];
+
+export type BereichBadgeStyle = {
+  borderColor: string;
+  color: string;
+  backgroundColor: string;
+};
+
+export function bereichBadgeStyle(farbe: string): BereichBadgeStyle {
+  const hex = (farbe || "#525252").trim();
+  const border = hex;
+  const text = hex;
+  let bg = "rgba(38,38,38,0.35)";
+  if (/^#([0-9a-fA-F]{6})$/.test(hex)) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    bg = `rgba(${r},${g},${b},0.18)`;
   }
+  return {
+    borderColor: border,
+    color: text,
+    backgroundColor: bg,
+  };
 }
 
 export function deadlineBadgeClass(deadline: string): string {

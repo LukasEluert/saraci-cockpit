@@ -5,6 +5,10 @@ function deadlineRank(d: string): number {
   return DEADLINE_ORDER[d] ?? 99;
 }
 
+function bereichLabel(t: Task): string {
+  return t.bereiche?.name?.trim() || "Sonstiges";
+}
+
 function sortOpenTasks(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => {
     const ra = deadlineRank(a.deadline || "");
@@ -17,7 +21,7 @@ function sortOpenTasks(tasks: Task[]): Task[] {
 function groupByBereich(tasks: Task[]): Map<string, Task[]> {
   const m = new Map<string, Task[]>();
   for (const t of tasks) {
-    const key = t.bereich?.trim() || "Sonstiges";
+    const key = bereichLabel(t);
     if (!m.has(key)) m.set(key, []);
     m.get(key)!.push(t);
   }
@@ -75,7 +79,7 @@ export function buildLeitfadenExport(params: { tasks: Task[] }): string {
     lines.push("");
   } else {
     for (const t of done) {
-      const b = t.bereich?.trim() || "Sonstiges";
+      const b = bereichLabel(t);
       lines.push(`- [x] (${b}) ${t.text}`);
     }
     lines.push("");

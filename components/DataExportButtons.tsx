@@ -6,15 +6,17 @@ import {
   buildTasksCsv,
   buildTasksJsonExport,
   downloadTextFile,
+  tasksToExportRows,
 } from "@/lib/exportBackup";
 import { getSupabase } from "@/lib/supabase";
+import { TASKS_LIST_SELECT } from "@/lib/taskSelect";
 import type { Task } from "@/lib/types";
 
 async function fetchAllTasksFromSupabase(): Promise<Task[]> {
   const sb = getSupabase();
   const { data, error } = await sb
     .from("tasks")
-    .select("*")
+    .select(TASKS_LIST_SELECT)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return (data as Task[]) ?? [];
@@ -36,17 +38,18 @@ export function DataExportButtons({ disabled = false }: Props) {
     setBusy(kind);
     try {
       const tasks = await fetchAllTasksFromSupabase();
+      const rows = tasksToExportRows(tasks);
       const stamp = backupDateStamp();
       if (kind === "json") {
         downloadTextFile(
           `saraci-backup-${stamp}.json`,
-          buildTasksJsonExport(tasks),
+          buildTasksJsonExport(rows),
           "application/json;charset=utf-8"
         );
       } else {
         downloadTextFile(
           `saraci-backup-${stamp}.csv`,
-          buildTasksCsv(tasks),
+          buildTasksCsv(rows),
           "text/csv;charset=utf-8"
         );
       }
