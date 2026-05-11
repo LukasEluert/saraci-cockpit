@@ -5,7 +5,7 @@ type UptimeRobotMonitor = {
   friendly_name: string;
   url: string;
   status: number;
-  custom_uptime_ranges?: string;
+  custom_uptime_ranges?: unknown;
 };
 
 type ApiMonitor = {
@@ -51,8 +51,6 @@ export async function GET(): Promise<NextResponse<ApiResponse | { error: string 
       api_key: apiKey,
       format: "json",
       logs: "0",
-      // 1-Tages-Uptime-Fenster
-      custom_uptime_ranges: "1",
     });
 
     const res = await fetch("https://api.uptimerobot.com/v2/getMonitors", {
@@ -66,27 +64,53 @@ export async function GET(): Promise<NextResponse<ApiResponse | { error: string 
     });
 
     if (!res.ok) {
+      const maybeText = await res.text().catch(() => "");
+      // eslint-disable-next-line no-console
+      console.error("UptimeRobot HTTP Fehler", {
+        status: res.status,
+        statusText: res.statusText,
+        response: maybeText.slice(0, 400),
+      });
       return NextResponse.json(
         { error: `UptimeRobot Fehler: ${res.status} ${res.statusText}` },
         { status: 502 },
       );
     }
 
-    const json = (await res.json()) as {
-      stat: string;
-      monitors?: UptimeRobotMonitor[];
-      error?: { message?: string };
-    };
-
-    if (json.stat !== "ok" || !Array.isArray(json.monitors)) {
+    let json: unknown = null;
+    try {
+      json = (await res.json()) as unknown;
+    } catch {
+      const raw = await res.text().catch(() => "");
+      // eslint-disable-next-line no-console
+      console.error("UptimeRobot Antwort ist kein JSON", raw.slice(0, 400));
       return NextResponse.json(
-        { error: json.error?.message || "UptimeRobot Antwort ungültig." },
+        { error: "UptimeRobot Antwort ist ungültig (kein JSON)." },
         { status: 502 },
       );
     }
 
-    const monitors: ApiMonitor[] = json.monitors.map((m) => {
-      const uptimeRaw = (m.custom_uptime_ranges || "").split("-")[0] || "";
+    const parsed = json as {
+      stat?: string;
+      monitors?: UptimeRobotMonitor[];
+      error?: { message?: string };
+    };
+
+    if (parsed.stat !== "ok" || !Array.isArray(parsed.monitors)) {
+      return NextResponse.json(
+        { error: parsed.error?.message || "UptimeRobot Antwort ungültig." },
+        { status: 502 },
+      );
+    }
+
+    const monitors: ApiMonitor[] = parsed.monitors.map((m) => {
+      const cru = m.custom_uptime_ranges;
+      const uptimeRaw =
+        typeof cru === "string"
+          ? cru.split("-")[0] || ""
+          : typeof cru === "number"
+            ? String(cru)
+            : "";
       const uptime = Number.parseFloat(uptimeRaw);
       const uptime24h = Number.isFinite(uptime) ? Math.max(0, Math.min(100, uptime)) : 0;
       return {
@@ -120,6 +144,8 @@ export async function GET(): Promise<NextResponse<ApiResponse | { error: string 
     return NextResponse.json({ monitors, summary });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unbekannter Fehler bei UptimeRobot.";
+    // eslint-disable-next-line no-console
+    console.error("UptimeRobot Route Error", e);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

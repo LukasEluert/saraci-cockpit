@@ -164,7 +164,7 @@ export default function AkquisePage() {
 
         <form
           onSubmit={handleAdd}
-          className="space-y-4 rounded-xl border border-[#222222] bg-[#111111] p-4"
+          className="space-y-4 overflow-hidden rounded-xl border border-[#222222] bg-[#111111] p-4"
         >
           <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
             Neuer Eintrag
@@ -191,7 +191,7 @@ export default function AkquisePage() {
                 value={datum}
                 onChange={(e) => setDatum(e.target.value)}
                 disabled={busy}
-                className="mt-1 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                className="mt-1 w-full max-w-full box-border rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
               />
             </label>
             <label className="block">

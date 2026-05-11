@@ -308,7 +308,7 @@ export default function Home() {
   const busy = sync === "syncing";
 
   return (
-    <div className="flex w-full max-w-full flex-col max-md:min-h-0 md:h-full md:min-h-0 md:flex-1 md:overflow-hidden">
+    <div className="flex w-full max-w-full flex-col max-md:min-h-0 md:h-full md:min-h-0 md:flex-1">
       <header className="shrink-0 bg-[#0a0a0a]">
         <div className="border-b border-[#222222] pt-[env(safe-area-inset-top)] md:hidden">
           <div className="flex h-14 max-w-full items-center gap-1.5 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
