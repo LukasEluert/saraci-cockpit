@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddForm } from "@/components/AddForm";
+import { DataExportButtons } from "@/components/DataExportButtons";
 import { LogoutButton } from "@/components/LogoutButton";
 import { TaskItem } from "@/components/TaskItem";
 import {
@@ -218,9 +219,12 @@ export default function Home() {
               Aufgaben · Supabase
             </p>
           </div>
-          <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
-            <LogoutButton />
-            <SyncDot status={sync} />
+          <div className="flex max-w-full shrink-0 flex-col items-end gap-3">
+            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+              <LogoutButton />
+              <SyncDot status={sync} />
+            </div>
+            <DataExportButtons disabled={busy} />
           </div>
         </header>
 
