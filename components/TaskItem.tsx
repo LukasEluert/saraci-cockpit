@@ -44,6 +44,53 @@ function taskWithBereichJoin(t: Task, bereiche: BereichRow[]): Task {
   };
 }
 
+function prioritaetTagStyle(p: number): import("react").CSSProperties {
+  if (p >= 1 && p <= 3) {
+    return {
+      borderColor: "#e63030",
+      color: "#e63030",
+      backgroundColor: "rgba(230,48,48,0.12)",
+    };
+  }
+  if (p >= 4 && p <= 7) {
+    return {
+      borderColor: "#d4a030",
+      color: "#d4a030",
+      backgroundColor: "rgba(212,160,48,0.12)",
+    };
+  }
+  return {
+    borderColor: "#555555",
+    color: "#555555",
+    backgroundColor: "rgba(38,38,38,0.45)",
+  };
+}
+
+function formatKurzAktualisiert(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("de-DE", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  }).formatToParts(d);
+  const pick = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((x) => x.type === type)?.value?.trim() ?? "";
+  let wd = pick("weekday");
+  if (wd && !wd.endsWith(".")) wd = `${wd}.`;
+  const day = pick("day");
+  const month = pick("month");
+  return `↻ ${wd} ${day}.${month}`;
+}
+
+function taskWurdeGeaendert(task: Task): boolean {
+  const u = task.updated_at?.trim();
+  const c = task.created_at?.trim();
+  if (!u) return false;
+  if (!c) return true;
+  return u !== c;
+}
+
 export function TaskItem({
   task,
   bereiche,
@@ -175,6 +222,15 @@ export function TaskItem({
   const showCal = taskHasCalendarDate(task);
   const wieder = task.wiederkehrend && task.wiederholung;
 
+  const pr = task.prioritaet;
+  const showPrioritaet =
+    pr !== null && pr !== undefined && typeof pr === "number" && Number.isFinite(pr);
+  const pNum = showPrioritaet ? Math.round(pr) : 0;
+
+  const aktualisiertText =
+    taskWurdeGeaendert(task) ? formatKurzAktualisiert(task.updated_at) : "";
+  const showAktualisiert = aktualisiertText.length > 0;
+
   const leftAccent: import("react").CSSProperties = {
     borderLeftWidth: 3,
     borderLeftColor: farbe,
@@ -298,9 +354,29 @@ export function TaskItem({
           >
             {task.deadline?.trim() || "Kein Datum"}
           </button>
+          {showPrioritaet ? (
+            <span
+              className="inline-flex items-center rounded border px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide"
+              style={prioritaetTagStyle(pNum)}
+            >
+              P{pNum}
+            </span>
+          ) : null}
           {wieder ? (
             <span className="inline-flex items-center rounded border border-[#404040] bg-[#0a0a0a] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-neutral-400">
               {(task.wiederholung as Wiederholung) ?? ""}
+            </span>
+          ) : null}
+          {showAktualisiert ? (
+            <span
+              className="inline-flex items-center rounded border px-2 py-0.5 font-mono text-[11px] tracking-wide"
+              style={{
+                borderColor: "var(--muted)",
+                color: "var(--muted)",
+                backgroundColor: "rgba(38,38,38,0.35)",
+              }}
+            >
+              {aktualisiertText}
             </span>
           ) : null}
         </div>
