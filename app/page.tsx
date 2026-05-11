@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddForm } from "@/components/AddForm";
+import { LogoutButton } from "@/components/LogoutButton";
 import { TaskItem } from "@/components/TaskItem";
 import {
   DEADLINE_ORDER,
@@ -217,7 +218,10 @@ export default function Home() {
               Aufgaben · Supabase
             </p>
           </div>
-          <SyncDot status={sync} />
+          <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+            <LogoutButton />
+            <SyncDot status={sync} />
+          </div>
         </header>
 
         {error ? (
