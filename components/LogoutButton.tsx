@@ -6,9 +6,10 @@ import { getSupabase } from "@/lib/supabase";
 
 type Props = {
   variant?: "default" | "compact";
+  className?: string;
 };
 
-export function LogoutButton({ variant = "default" }: Props) {
+export function LogoutButton({ variant = "default", className = "" }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -32,7 +33,7 @@ export function LogoutButton({ variant = "default" }: Props) {
         aria-label="Abmelden"
         onClick={() => void handleLogout()}
         disabled={busy}
-        className="tap-scale flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#333333] text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40"
+        className={`tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#333333] text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40 md:h-11 md:w-11 ${className}`}
       >
         <svg
           className="h-5 w-5"

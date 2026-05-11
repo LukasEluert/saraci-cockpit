@@ -19,6 +19,10 @@ import { getSupabase } from "@/lib/supabase";
 import { TASKS_LIST_SELECT } from "@/lib/taskSelect";
 import type { AkquiseLogRow, ProjektRow, Task } from "@/lib/types";
 
+/** iOS: DM Mono kann Ziffern falsch rendern — KPI-Zahlen mit System-Monospace. */
+const kpiValueFontClass =
+  "font-normal tabular-nums [font-family:ui-monospace,'SF_Mono',SFMono-Regular,Menlo,Monaco,Consolas,monospace] [font-variant-numeric:lining-nums]";
+
 function Kpi({
   value,
   label,
@@ -34,7 +38,9 @@ function Kpi({
       : value;
   return (
     <div className="flex min-h-0 flex-col items-center justify-center rounded-lg border border-[#222222] bg-[#111111] px-1 py-2 text-center">
-      <p className="font-mono text-[clamp(1.4rem,4.5vmin,2.75rem)] font-normal tabular-nums leading-none tracking-tight text-neutral-100">
+      <p
+        className={`text-[clamp(1.4rem,4.5vmin,2.75rem)] leading-none tracking-tight text-neutral-100 ${kpiValueFontClass}`}
+      >
         {display}
       </p>
       <p className="mt-1 max-w-full truncate px-0.5 font-mono text-[clamp(0.55rem,1.1vmin,0.7rem)] uppercase leading-tight tracking-wide text-neutral-500">
@@ -187,7 +193,9 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <p className="font-mono text-[clamp(0.75rem,1.8vmin,1rem)] tabular-nums text-[#e63030]">
+          <p
+            className={`text-[clamp(0.75rem,1.8vmin,1rem)] text-[#e63030] ${kpiValueFontClass}`}
+          >
             {timeStr}
           </p>
           <p className="max-w-[14rem] truncate font-mono text-[clamp(0.55rem,1vmin,0.65rem)] text-neutral-400">

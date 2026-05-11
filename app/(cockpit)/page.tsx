@@ -16,6 +16,19 @@ import type { BereichRow, Task, Wiederholung } from "@/lib/types";
 
 type SyncState = "ok" | "syncing" | "error";
 
+function formatDatumMobileHeader(d: Date): string {
+  const parts = new Intl.DateTimeFormat("de-DE", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  }).formatToParts(d);
+  const v = (t: "weekday" | "day" | "month") =>
+    parts.find((p) => p.type === t)?.value?.trim() ?? "";
+  let wd = v("weekday");
+  if (wd && !wd.endsWith(".")) wd = `${wd}.`;
+  return `${wd} ${v("day")}.${v("month")}`;
+}
+
 function sortOpenTasks(list: Task[]): Task[] {
   return [...list].sort((a, b) => {
     const ra = DEADLINE_ORDER[a.deadline || ""] ?? 99;
@@ -84,12 +97,8 @@ export default function Home() {
     return () => window.clearInterval(id);
   }, []);
 
-  const datumShort = useMemo(
-    () =>
-      new Date().toLocaleDateString("de-DE", {
-        day: "2-digit",
-        month: "2-digit",
-      }),
+  const datumMobile = useMemo(
+    () => formatDatumMobileHeader(new Date()),
     [dateTick]
   );
 
@@ -301,27 +310,27 @@ export default function Home() {
   return (
     <div className="flex h-full min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden md:min-h-[100dvh] md:overflow-visible">
       <header className="shrink-0 border-t-2 border-[#e63030] bg-[#0a0a0a]">
-        <div className="flex h-14 max-w-full items-center justify-between gap-2 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] md:hidden">
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <SaraciLogo height={32} priority className="shrink-0" />
-            <h1 className="truncate font-mono text-[11px] font-semibold uppercase leading-tight tracking-wide text-neutral-100">
+        <div className="border-b border-[#222222] pt-[env(safe-area-inset-top)] md:hidden">
+          <div className="flex h-14 max-w-full items-center gap-1.5 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
+            <SaraciLogo
+              height={28}
+              priority
+              className="max-h-[28px] shrink-0 object-contain"
+            />
+            <h1 className="min-w-0 flex-1 truncate font-mono text-[10px] font-semibold uppercase leading-tight tracking-wide text-neutral-100">
               Saraci Cockpit
             </h1>
+            <div className="flex shrink-0 items-center gap-1">
+              <SyncDot status={sync} compact />
+              <time
+                dateTime={new Date().toISOString()}
+                className="whitespace-nowrap font-mono text-[10px] tabular-nums text-neutral-400"
+              >
+                {datumMobile}
+              </time>
+              <LogoutButton variant="compact" />
+            </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <SyncDot status={sync} compact />
-            <time
-              dateTime={new Date().toISOString()}
-              className="font-mono text-[10px] tabular-nums text-neutral-400"
-            >
-              {datumShort}
-            </time>
-          </div>
-        </div>
-
-        <div className="flex max-w-full items-center justify-end gap-2 border-b border-[#222222] px-[max(0.75rem,env(safe-area-inset-left))] py-2 pr-[max(0.75rem,env(safe-area-inset-right))] md:hidden">
-          <LogoutButton variant="compact" />
-          <DataExportButtons variant="compact" disabled={busy} />
         </div>
 
         <div className="hidden max-w-full flex-col gap-3 px-[max(1rem,env(safe-area-inset-left))] pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] md:flex">

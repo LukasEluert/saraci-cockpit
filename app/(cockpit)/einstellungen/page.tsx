@@ -167,7 +167,7 @@ export default function EinstellungenPage() {
                   value={newFarbe.length === 7 ? newFarbe : "#e63030"}
                   onChange={(e) => setNewFarbe(e.target.value)}
                   disabled={busy}
-                  className="h-10 w-12 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] disabled:opacity-50"
+                  className="h-10 w-12 max-h-10 max-w-[40px] cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] disabled:opacity-50 md:max-h-none md:max-w-none"
                 />
                 <input
                   value={newFarbe}
@@ -199,7 +199,7 @@ export default function EinstellungenPage() {
               Lade …
             </p>
           ) : (
-            <ul className="mt-3 space-y-3">
+            <ul className="mt-3 space-y-1.5 md:space-y-3">
               {bereiche.map((b) => (
                 <BereichEditorRow
                   key={b.id}
@@ -237,10 +237,42 @@ function BereichEditorRow({
   }, [row.id, row.name, row.farbe]);
 
   const dirty = name.trim() !== row.name || farbe.trim() !== row.farbe;
+  const colorValue = /^#[0-9a-fA-F]{6}$/.test(farbe) ? farbe : "#525252";
 
   return (
-    <li className="rounded-lg border border-[#222222] bg-[#111111] p-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+    <li className="rounded-lg border border-[#222222] bg-[#111111] px-2 py-1.5 md:p-3">
+      <div className="flex items-center gap-2 md:hidden">
+        <input
+          type="color"
+          value={colorValue}
+          onChange={(e) => setFarbe(e.target.value)}
+          disabled={busy}
+          aria-label="Farbe"
+          className="h-10 w-10 max-h-[40px] max-w-[40px] shrink-0 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] p-0 disabled:opacity-50"
+        />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={busy}
+          placeholder="Name"
+          className="min-w-0 flex-1 rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-1.5 font-sans text-sm text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+        />
+        <BereichIconButton
+          label="Speichern"
+          disabled={busy || !dirty}
+          onClick={() => onSave(row, name, farbe)}
+          variant="save"
+        />
+        <BereichIconButton
+          label="Löschen"
+          disabled={busy}
+          onClick={() => void onDelete(row)}
+          variant="delete"
+        />
+      </div>
+
+      <div className="hidden md:block">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="block min-w-0 flex-1">
           <span className="font-mono text-[10px] uppercase text-neutral-500">
             Name
@@ -259,7 +291,7 @@ function BereichEditorRow({
           <div className="mt-1 flex gap-2">
             <input
               type="color"
-              value={/^#[0-9a-fA-F]{6}$/.test(farbe) ? farbe : "#525252"}
+              value={colorValue}
               onChange={(e) => setFarbe(e.target.value)}
               disabled={busy}
               className="h-10 w-12 shrink-0 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] disabled:opacity-50"
@@ -290,7 +322,59 @@ function BereichEditorRow({
             Löschen
           </button>
         </div>
+        </div>
       </div>
     </li>
+  );
+}
+
+function BereichIconButton({
+  label,
+  disabled,
+  onClick,
+  variant,
+}: {
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  variant: "save" | "delete";
+}) {
+  return (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="tap-scale flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#333333] text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40"
+    >
+      {variant === "save" ? (
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      ) : (
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14ZM10 11v6M14 11v6" />
+        </svg>
+      )}
+    </button>
   );
 }
