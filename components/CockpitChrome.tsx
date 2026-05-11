@@ -163,11 +163,11 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain pb-[calc(100px+env(safe-area-inset-bottom))] max-md:min-h-0 md:min-h-[100dvh] md:overflow-y-auto md:pb-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain max-md:min-h-0 md:min-h-[100dvh] md:overflow-y-auto">
         {children}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 min-h-[64px] border-t border-[#222222] bg-[#111111]/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-[12px] md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-40 min-h-[64px] border-t border-[#222222] bg-[#111111] pb-[env(safe-area-inset-bottom,0px)] md:hidden">
         <div className="flex h-full min-h-[64px] w-full max-w-full items-stretch">
           <CockpitNavLinks variant="bottom" sitesIndicator={sitesIndicator} />
         </div>
