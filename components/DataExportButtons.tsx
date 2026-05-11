@@ -23,13 +23,20 @@ async function fetchAllTasksFromSupabase(): Promise<Task[]> {
 }
 
 const btnClass =
-  "rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40";
+  "tap-scale rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-200 hover:border-[#e63030] hover:text-white disabled:opacity-40";
+
+const iconBtnClass =
+  "tap-scale flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#333333] bg-[#0a0a0a] text-neutral-300 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40";
 
 type Props = {
   disabled?: boolean;
+  variant?: "default" | "compact";
 };
 
-export function DataExportButtons({ disabled = false }: Props) {
+export function DataExportButtons({
+  disabled = false,
+  variant = "default",
+}: Props) {
   const [busy, setBusy] = useState<"json" | "csv" | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -62,9 +69,56 @@ export function DataExportButtons({ disabled = false }: Props) {
 
   const blocked = disabled || busy !== null;
 
+  if (variant === "compact") {
+    return (
+      <div className="flex shrink-0 items-center gap-1.5">
+        <button
+          type="button"
+          title="JSON exportieren"
+          aria-label="JSON exportieren"
+          disabled={blocked}
+          onClick={() => void run("json")}
+          className={iconBtnClass}
+        >
+          <span className="font-mono text-[10px] font-semibold leading-none text-[#e63030]">
+            {"{}"}
+          </span>
+        </button>
+        <button
+          type="button"
+          title="CSV exportieren"
+          aria-label="CSV exportieren"
+          disabled={blocked}
+          onClick={() => void run("csv")}
+          className={iconBtnClass}
+        >
+          <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            aria-hidden
+          >
+            <path d="M14 3v4a1 1 0 0 0 1 1h4M5 21h14a2 2 0 0 0 2-2V8l-5-5H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z" />
+            <path d="M9 17h6M9 13h6M9 9h2" />
+          </svg>
+        </button>
+        {localError ? (
+          <span
+            className="sr-only"
+            role="status"
+          >
+            {localError}
+          </span>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-end gap-1.5">
-      <div className="flex flex-wrap justify-end gap-2">
+      <div className="flex max-w-full flex-wrap justify-end gap-2">
         <button
           type="button"
           disabled={blocked}

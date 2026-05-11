@@ -5,5 +5,11 @@ export default function CockpitLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <CockpitChrome>{children}</CockpitChrome>;
+  return (
+    <CockpitChrome>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:overflow-visible">
+        {children}
+      </div>
+    </CockpitChrome>
+  );
 }

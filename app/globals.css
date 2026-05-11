@@ -17,12 +17,31 @@
 
 html {
   color-scheme: dark;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+button:active:not(:disabled),
+a.tap-scale:active {
+  transform: scale(0.96);
+}
+
+button,
+a.tap-scale {
+  transition:
+    transform 150ms ease,
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease;
 }
 
 .font-mono {

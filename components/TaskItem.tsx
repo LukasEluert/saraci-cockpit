@@ -82,62 +82,74 @@ export function TaskItem({
   const showCal = taskHasCalendarDate(task);
   const wieder = task.wiederkehrend && task.wiederholung;
 
+  const leftAccent: import("react").CSSProperties = {
+    borderLeftWidth: 3,
+    borderLeftColor: farbe,
+    borderTopLeftRadius: "0.5rem",
+    borderBottomLeftRadius: "0.5rem",
+  };
+
   return (
     <div
       className={[
-        "group flex gap-3 rounded-lg border border-[#222222] bg-[#111111] px-3 py-3 transition-colors",
+        "group flex max-w-full gap-2 rounded-lg border border-[#222222] bg-[#111111] py-2 pl-2 pr-2 transition-colors md:gap-3 md:px-3 md:py-3",
         done ? "opacity-50" : "",
       ].join(" ")}
+      style={leftAccent}
     >
       <button
         type="button"
         onClick={() => onToggle(task)}
         aria-label={done ? "Als offen markieren" : "Als erledigt markieren"}
-        className={[
-          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors",
-          done
-            ? "border-[#e63030] bg-[#e63030] text-white"
-            : "border-[#404040] bg-transparent hover:border-[#737373]",
-        ].join(" ")}
+        className="tap-scale flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-lg border border-transparent hover:border-[#404040]"
       >
-        {done ? (
-          <svg
-            className="h-3 w-3"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden
-          >
-            <path
-              d="M2 6L5 9L10 3"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ) : null}
+        <span
+          className={[
+            "flex h-5 w-5 items-center justify-center rounded border transition-colors",
+            done
+              ? "border-[#e63030] bg-[#e63030] text-white"
+              : "border-[#404040] bg-transparent hover:border-[#737373]",
+          ].join(" ")}
+        >
+          {done ? (
+            <svg
+              className="h-3 w-3"
+              viewBox="0 0 12 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden
+            >
+              <path
+                d="M2 6L5 9L10 3"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          ) : null}
+        </span>
       </button>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 overflow-hidden">
         <p
           className={[
-            "font-sans text-[15px] leading-snug text-neutral-100",
+            "break-words font-sans text-[15px] leading-snug text-neutral-100",
             done ? "line-through" : "",
           ].join(" ")}
         >
           {task.text}
         </p>
         {notizPreview(task.notiz) ? (
-          <p className="mt-1 font-sans text-[12px] leading-snug text-neutral-500">
+          <p className="mt-1 break-words font-sans text-[12px] leading-snug text-neutral-500">
             {notizPreview(task.notiz)}
           </p>
         ) : null}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="mt-2 flex max-w-full flex-wrap items-center gap-2">
           <span
-            className="inline-flex items-center rounded border px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide"
+            className="inline-flex max-w-full items-center rounded border px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide"
             style={bereichBadgeStyle(farbe)}
           >
-            {bereichName}
+            <span className="truncate">{bereichName}</span>
           </span>
           <span
             className={[
@@ -162,7 +174,7 @@ export function TaskItem({
             rows={3}
             autoFocus
             placeholder="Notiz …"
-            className="mt-3 w-full resize-y rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-2 font-sans text-[13px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+            className="mt-3 w-full max-w-full resize-y rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-2 font-sans text-[13px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
           />
         ) : null}
       </div>
@@ -178,7 +190,7 @@ export function TaskItem({
               skipBlurSave.current = false;
             }}
             aria-label="Notiz bearbeiten"
-            className="rounded p-1.5 text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
+            className="tap-scale flex h-11 w-11 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
           >
             <svg
               className="h-4 w-4"
@@ -203,7 +215,7 @@ export function TaskItem({
                 handleIcsDownload();
               }}
               aria-label="Kalender exportieren"
-              className="rounded p-1.5 text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
+              className="tap-scale flex h-11 w-11 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
             >
               <svg
                 className="h-4 w-4"
@@ -222,7 +234,7 @@ export function TaskItem({
         <button
           type="button"
           onClick={() => onDelete(task)}
-          className="rounded px-2 py-1 font-mono text-[11px] text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
+          className="tap-scale flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2 font-mono text-[11px] text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
         >
           Löschen
         </button>

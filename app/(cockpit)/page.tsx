@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddForm, type AddTaskPayload } from "@/components/AddForm";
 import { DataExportButtons } from "@/components/DataExportButtons";
 import { LogoutButton } from "@/components/LogoutButton";
+import { SaraciLogo } from "@/components/SaraciLogo";
 import { TaskItem } from "@/components/TaskItem";
 import { DEADLINE_ORDER } from "@/lib/constants";
 import { buildLeitfadenExport } from "@/lib/exportGuide";
@@ -26,7 +27,13 @@ function sortOpenTasks(list: Task[]): Task[] {
   });
 }
 
-function SyncDot({ status }: { status: SyncState }) {
+function SyncDot({
+  status,
+  compact,
+}: {
+  status: SyncState;
+  compact?: boolean;
+}) {
   const color =
     status === "ok"
       ? "bg-[#22c55e]"
@@ -41,18 +48,25 @@ function SyncDot({ status }: { status: SyncState }) {
         : "Fehler";
 
   return (
-    <span className="inline-flex items-center gap-2">
+    <span
+      className="inline-flex items-center gap-1.5"
+      title={label}
+    >
       <span
         className={[
-          "inline-block h-2.5 w-2.5 rounded-full",
+          "inline-block h-2.5 w-2.5 shrink-0 rounded-full",
           color,
           status === "syncing" ? "animate-pulse" : "",
         ].join(" ")}
         aria-hidden
       />
-      <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-        {label}
-      </span>
+      {compact ? (
+        <span className="sr-only">{label}</span>
+      ) : (
+        <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+          {label}
+        </span>
+      )}
     </span>
   );
 }
@@ -63,6 +77,21 @@ export default function Home() {
   const [sync, setSync] = useState<SyncState>("syncing");
   const [error, setError] = useState<string | null>(null);
   const [copyNotice, setCopyNotice] = useState(false);
+  const [dateTick, setDateTick] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setDateTick((n) => n + 1), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const datumShort = useMemo(
+    () =>
+      new Date().toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+      }),
+    [dateTick]
+  );
 
   const runWithSync = useCallback(async (fn: () => Promise<void>) => {
     setSync("syncing");
@@ -270,150 +299,183 @@ export default function Home() {
   const busy = sync === "syncing";
 
   return (
-    <div className="min-h-[100dvh] bg-[#0a0a0a] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-      <div className="mx-auto flex w-full max-w-lg flex-col gap-8">
-        <header className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-sans text-xl font-medium tracking-tight text-neutral-100">
+    <div className="flex h-full min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden md:min-h-[100dvh] md:overflow-visible">
+      <header className="shrink-0 border-t-2 border-[#e63030] bg-[#0a0a0a]">
+        <div className="flex h-14 max-w-full items-center justify-between gap-2 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] md:hidden">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <SaraciLogo height={32} priority className="shrink-0" />
+            <h1 className="truncate font-mono text-[11px] font-semibold uppercase leading-tight tracking-wide text-neutral-100">
               Saraci Cockpit
             </h1>
-            <p className="mt-1 font-mono text-[11px] text-neutral-500">
-              Aufgaben · Supabase
-            </p>
           </div>
-          <div className="flex max-w-full shrink-0 flex-col items-end gap-3">
-            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
-              <LogoutButton />
-              <SyncDot status={sync} />
-            </div>
-            <DataExportButtons disabled={busy} />
+          <div className="flex shrink-0 items-center gap-2">
+            <SyncDot status={sync} compact />
+            <time
+              dateTime={new Date().toISOString()}
+              className="font-mono text-[10px] tabular-nums text-neutral-400"
+            >
+              {datumShort}
+            </time>
           </div>
-        </header>
+        </div>
 
-        {error ? (
-          <p className="rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
-            {error}
-          </p>
-        ) : null}
+        <div className="flex max-w-full items-center justify-end gap-2 border-b border-[#222222] px-[max(0.75rem,env(safe-area-inset-left))] py-2 pr-[max(0.75rem,env(safe-area-inset-right))] md:hidden">
+          <LogoutButton variant="compact" />
+          <DataExportButtons variant="compact" disabled={busy} />
+        </div>
 
-        <section className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl border border-[#222222] bg-[#111111] px-3 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">
-              Offen
-            </p>
-            <p className="mt-1 font-mono text-3xl font-light leading-none text-neutral-100">
-              {stats.offen}
-            </p>
-          </div>
-          <div className="rounded-xl border border-[#222222] bg-[#111111] px-3 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">
-              Heute fällig
-            </p>
-            <p className="mt-1 font-mono text-3xl font-light leading-none text-[#f87171]">
-              {stats.heute}
-            </p>
-          </div>
-          <div className="rounded-xl border border-[#222222] bg-[#111111] px-3 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">
-              Diese Woche
-            </p>
-            <p className="mt-1 font-mono text-3xl font-light leading-none text-[#fcd34d]">
-              {stats.woche}
-            </p>
-          </div>
-        </section>
-
-        <AddForm bereiche={bereiche} disabled={busy} onAdd={handleAdd} />
-
-        <section>
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-            Offen
-          </h2>
-          <div className="mt-3 flex flex-col gap-2">
-            {openTasks.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-[#333333] px-3 py-6 text-center font-sans text-sm text-neutral-500">
-                Nichts Offenes — gute Arbeit.
+        <div className="hidden max-w-full flex-col gap-3 px-[max(1rem,env(safe-area-inset-left))] pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] md:flex">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="font-sans text-xl font-medium tracking-tight text-neutral-100">
+                Saraci Cockpit
+              </h1>
+              <p className="mt-1 font-mono text-[11px] text-neutral-500">
+                Aufgaben · Supabase
               </p>
-            ) : (
-              openTasks.map((t) => (
-                <TaskItem
-                  key={t.id}
-                  task={t}
-                  onToggle={handleToggle}
-                  onDelete={handleDelete}
-                  onNotizSaved={handleNotizSaved}
-                />
-              ))
-            )}
+            </div>
+            <div className="flex max-w-full shrink-0 flex-col items-end gap-3">
+              <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+                <LogoutButton />
+                <SyncDot status={sync} />
+              </div>
+              <DataExportButtons disabled={busy} />
+            </div>
           </div>
-        </section>
+        </div>
+      </header>
 
-        <section>
-          <details className="group rounded-xl border border-[#222222] bg-[#111111]">
-            <summary className="cursor-pointer list-none px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-neutral-400 [&::-webkit-details-marker]:hidden">
-              <span className="flex items-center justify-between gap-2">
-                <span>
-                  Erledigt
-                  <span className="ml-2 text-neutral-600">
-                    ({doneTasks.length})
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pb-3 pt-3 md:block md:overflow-visible md:px-[max(1rem,env(safe-area-inset-left))] md:pb-8 md:pr-[max(1rem,env(safe-area-inset-right))] md:pt-0">
+        <div className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-4 md:max-w-lg md:gap-8">
+          {error ? (
+            <p className="shrink-0 rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
+              {error}
+            </p>
+          ) : null}
+
+          <section className="grid w-full max-w-full shrink-0 grid-cols-3 gap-2 md:gap-3">
+            <div className="min-w-0 rounded-xl border border-[#222222] bg-[#111111] px-2 py-3 md:px-3 md:py-4">
+              <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
+                Offen
+              </p>
+              <p className="mt-1 font-mono text-[18px] font-light leading-none text-neutral-100 md:text-3xl">
+                {stats.offen}
+              </p>
+            </div>
+            <div className="min-w-0 rounded-xl border border-[#222222] bg-[#111111] px-2 py-3 md:px-3 md:py-4">
+              <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
+                Heute fällig
+              </p>
+              <p className="mt-1 font-mono text-[18px] font-light leading-none text-[#f87171] md:text-3xl">
+                {stats.heute}
+              </p>
+            </div>
+            <div className="min-w-0 rounded-xl border border-[#222222] bg-[#111111] px-2 py-3 md:px-3 md:py-4">
+              <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
+                Diese Woche
+              </p>
+              <p className="mt-1 font-mono text-[18px] font-light leading-none text-[#fcd34d] md:text-3xl">
+                {stats.woche}
+              </p>
+            </div>
+          </section>
+
+          <div className="shrink-0">
+            <AddForm bereiche={bereiche} disabled={busy} onAdd={handleAdd} />
+          </div>
+
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto max-md:flex-1 md:overflow-visible">
+            <section className="min-w-0 shrink-0">
+              <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+                Offen
+              </h2>
+              <div className="mt-3 flex min-w-0 flex-col gap-2">
+                {openTasks.length === 0 ? (
+                  <p className="rounded-lg border border-dashed border-[#333333] px-3 py-6 text-center font-sans text-sm text-neutral-500">
+                    Nichts Offenes — gute Arbeit.
+                  </p>
+                ) : (
+                  openTasks.map((t) => (
+                    <TaskItem
+                      key={t.id}
+                      task={t}
+                      onToggle={handleToggle}
+                      onDelete={handleDelete}
+                      onNotizSaved={handleNotizSaved}
+                    />
+                  ))
+                )}
+              </div>
+            </section>
+
+            <section className="mt-4 min-w-0 shrink-0">
+            <details className="group rounded-xl border border-[#222222] bg-[#111111]">
+              <summary className="tap-scale cursor-pointer list-none px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-neutral-400 [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center justify-between gap-2">
+                  <span>
+                    Erledigt
+                    <span className="ml-2 text-neutral-600">
+                      ({doneTasks.length})
+                    </span>
+                  </span>
+                  <span className="text-neutral-600 transition-transform duration-150 group-open:rotate-180">
+                    ⌄
                   </span>
                 </span>
-                <span className="text-neutral-600 transition-transform group-open:rotate-180">
-                  ⌄
-                </span>
-              </span>
-            </summary>
-            <div className="border-t border-[#222222] px-3 pb-3 pt-3">
-              {doneTasks.length === 0 ? (
-                <p className="py-4 text-center font-sans text-sm text-neutral-500">
-                  Noch keine erledigten Aufgaben.
-                </p>
-              ) : (
-                <>
-                  <div className="mb-4 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleDeleteAllDone}
-                      disabled={busy}
-                      className="rounded-lg border border-[#333333] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40"
-                    >
-                      Alle erledigten löschen
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    {doneTasks.map((t) => (
-                      <TaskItem
-                        key={t.id}
-                        task={t}
-                        onToggle={handleToggle}
-                        onDelete={handleDelete}
-                        onNotizSaved={handleNotizSaved}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </details>
-        </section>
+              </summary>
+              <div className="border-t border-[#222222] px-3 pb-3 pt-3">
+                {doneTasks.length === 0 ? (
+                  <p className="py-4 text-center font-sans text-sm text-neutral-500">
+                    Noch keine erledigten Aufgaben.
+                  </p>
+                ) : (
+                  <>
+                    <div className="mb-4 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={handleDeleteAllDone}
+                        disabled={busy}
+                        className="tap-scale rounded-lg border border-[#333333] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40"
+                      >
+                        Alle erledigten löschen
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {doneTasks.map((t) => (
+                        <TaskItem
+                          key={t.id}
+                          task={t}
+                          onToggle={handleToggle}
+                          onDelete={handleDelete}
+                          onNotizSaved={handleNotizSaved}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </details>
+            </section>
 
-        <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-            Export für Leitfaden
-          </h2>
-          <p className="mt-2 font-sans text-sm leading-relaxed text-neutral-400">
-            Kopiert strukturierten Text für z. B. Claude (Markdown-Abschnitte,
-            Bereiche, Checkboxen).
-          </p>
-          <button
-            type="button"
-            onClick={handleExportCopy}
-            disabled={busy}
-            className="mt-4 w-full rounded-lg border border-[#333333] bg-[#0a0a0a] px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40"
-          >
-            {copyNotice ? "In Zwischenablage kopiert" : "Text kopieren"}
-          </button>
-        </section>
+            <section className="mt-4 min-w-0 shrink-0 rounded-xl border border-[#222222] bg-[#111111] p-4">
+            <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+              Export für Leitfaden
+            </h2>
+            <p className="mt-2 font-sans text-sm leading-relaxed text-neutral-400">
+              Kopiert strukturierten Text für z. B. Claude (Markdown-Abschnitte,
+              Bereiche, Checkboxen).
+            </p>
+            <button
+              type="button"
+              onClick={handleExportCopy}
+              disabled={busy}
+              className="tap-scale mt-4 w-full rounded-lg border border-[#333333] bg-[#0a0a0a] px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40"
+            >
+              {copyNotice ? "In Zwischenablage kopiert" : "Text kopieren"}
+            </button>
+            </section>
+          </div>
+        </div>
       </div>
     </div>
   );

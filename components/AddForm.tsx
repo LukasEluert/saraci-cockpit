@@ -72,9 +72,9 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-[#222222] bg-[#111111] p-4"
+      className="w-full max-w-full rounded-xl border border-[#222222] bg-[#111111] p-3 md:p-4"
     >
-      <label className="block">
+      <label className="block max-w-full">
         <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
           Aufgabe
         </span>
@@ -84,11 +84,12 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
           onChange={(e) => setText(e.target.value)}
           placeholder="Was steht an?"
           disabled={disabled}
-          className="mt-2 w-full resize-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[15px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+          className="mt-2 w-full max-w-full resize-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[15px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
         />
       </label>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="block">
+
+      <div className="mt-4 grid w-full max-w-full grid-cols-2 gap-2">
+        <label className="block min-w-0 max-w-full">
           <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
             Bereich
           </span>
@@ -96,12 +97,12 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
             value={bereichId}
             onChange={(e) => setBereichId(e.target.value)}
             disabled={disabled || bereiche.length === 0}
-            className="mt-2 w-full appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2.5 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+            className="mt-2 w-full max-w-full min-w-0 appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-2.5 font-sans text-[13px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50 md:px-3 md:text-[14px]"
           >
             {bereichOptions}
           </select>
         </label>
-        <label className="block">
+        <label className="block min-w-0 max-w-full">
           <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
             Deadline
           </span>
@@ -109,7 +110,7 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
             value={deadline}
             onChange={(e) => setDeadline(e.target.value as Deadline)}
             disabled={disabled}
-            className="mt-2 w-full appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2.5 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+            className="mt-2 w-full max-w-full min-w-0 appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-2.5 font-sans text-[13px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50 md:px-3 md:text-[14px]"
           >
             {DEADLINES.map((d) => (
               <option key={d} value={d}>
@@ -120,21 +121,21 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
         </label>
       </div>
 
-      <div className="mt-4 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-3">
+      <div className="mt-4 max-w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-3">
         <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
             checked={wiederkehrend}
             onChange={(e) => setWiederkehrend(e.target.checked)}
             disabled={disabled}
-            className="h-4 w-4 rounded border-[#404040] bg-[#111111] text-[#e63030] focus:ring-[#e63030]"
+            className="tap-scale h-4 w-4 shrink-0 rounded border-[#404040] bg-[#111111] text-[#e63030] focus:ring-[#e63030]"
           />
           <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-400">
             Wiederkehrend
           </span>
         </label>
         {wiederkehrend ? (
-          <label className="mt-3 block">
+          <label className="mt-3 block max-w-full">
             <span className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">
               Intervall
             </span>
@@ -144,7 +145,7 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
                 setWiederholung(e.target.value as Wiederholung)
               }
               disabled={disabled}
-              className="mt-1.5 w-full appearance-none rounded-lg border border-[#222222] bg-[#111111] px-3 py-2 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+              className="mt-1.5 w-full max-w-full appearance-none rounded-lg border border-[#222222] bg-[#111111] px-3 py-2 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
             >
               {WIEDERHOLUNGEN.map((w) => (
                 <option key={w} value={w}>
@@ -156,11 +157,11 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
         ) : null}
       </div>
 
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 w-full max-w-full">
         <button
           type="submit"
           disabled={disabled || !text.trim() || !bereichId}
-          className="rounded-lg bg-[#e63030] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-white transition-colors hover:bg-[#c92828] disabled:cursor-not-allowed disabled:opacity-40"
+          className="tap-scale w-full rounded-lg bg-[#e63030] px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-white transition-colors hover:bg-[#c92828] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Hinzufügen
         </button>
