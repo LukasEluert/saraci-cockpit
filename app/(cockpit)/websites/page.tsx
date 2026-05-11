@@ -25,6 +25,25 @@ type ApiResponse = {
   summary: Summary;
 };
 
+function mapStatus(code: number): MonitorStatus {
+  // UptimeRobot v2 status codes:
+  // 0 = paused, 1 = not checked yet, 2 = up, 8/9 = seems down/down
+  if (code === 2) return "up";
+  if (code === 8 || code === 9) return "down";
+  return "paused";
+}
+
+function parseUptime24h(custom: unknown): number {
+  // custom_uptime_ranges is typically "99.9-99.9" (1-day window)
+  let raw = "";
+  if (typeof custom === "string") raw = custom;
+  else if (Array.isArray(custom) && custom.length > 0) raw = String(custom[0]);
+  else if (custom != null) raw = String(custom);
+  const first = raw.split("-")[0] || "";
+  const n = Number.parseFloat(first);
+  return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+}
+
 export default function WebsitesPage() {
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -40,9 +59,62 @@ export default function WebsitesPage() {
       if (!res.ok) {
         throw new Error(`Laden fehlgeschlagen (${res.status})`);
       }
-      const data = (await res.json()) as ApiResponse;
-      setMonitors(data.monitors ?? []);
-      setSummary(data.summary ?? null);
+      let raw: unknown;
+      try {
+        raw = await res.json();
+      } catch {
+        throw new Error("UptimeRobot Antwort ist ungültig (kein JSON).");
+      }
+
+      const ur = raw as {
+        stat?: string;
+        monitors?: Array<{
+          id?: number;
+          friendly_name?: string;
+          url?: string;
+          status?: number;
+          custom_uptime_ranges?: unknown;
+        }>;
+        error?: { message?: string };
+      };
+
+      if (ur.stat !== "ok") {
+        throw new Error(
+          ur.error?.message ||
+            `UptimeRobot Antwortfehler (stat=${ur.stat ?? "unknown"}).`,
+        );
+      }
+      if (!Array.isArray(ur.monitors)) {
+        throw new Error("UptimeRobot Antwort ungültig (monitors fehlen).");
+      }
+
+      const mapped: Monitor[] = ur.monitors.map((m, idx) => {
+        const id = typeof m.id === "number" ? m.id : idx;
+        const statusCode = typeof m.status === "number" ? m.status : 1;
+        return {
+          id,
+          name: m.friendly_name ?? "Monitor",
+          url: m.url ?? "",
+          status: mapStatus(statusCode),
+          uptime24h: parseUptime24h(m.custom_uptime_ranges),
+        };
+      });
+
+      const total = mapped.length;
+      const up = mapped.filter((m) => m.status === "up").length;
+      const down = mapped.filter((m) => m.status === "down").length;
+      const paused = mapped.filter((m) => m.status === "paused").length;
+      const uptime24hAvg =
+        total > 0 ? mapped.reduce((s, m) => s + m.uptime24h, 0) / total : 0;
+
+      setMonitors(mapped);
+      setSummary({
+        total,
+        up,
+        down,
+        paused,
+        uptime24hAvg: Math.round(uptime24hAvg * 10) / 10,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Laden fehlgeschlagen");
       setMonitors([]);
@@ -76,7 +148,7 @@ export default function WebsitesPage() {
   }, [summary]);
 
   return (
-    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-[#0a0a0a] px-[max(1rem,env(safe-area-inset-left))] pb-3 max-md:pb-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(env(safe-area-inset-top),16px)] md:min-h-[100dvh] md:pb-8">
+    <div className="flex min-h-0 max-w-full flex-1 flex-col overflow-x-hidden bg-[#0a0a0a] px-[max(1rem,env(safe-area-inset-left))] pb-3 max-md:pb-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(env(safe-area-inset-top),16px)] md:pb-8">
       <div className="mx-auto w-full min-w-0 max-w-lg space-y-6">
         <header className="flex items-start justify-between gap-3">
           <div>

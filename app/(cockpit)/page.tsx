@@ -308,7 +308,7 @@ export default function Home() {
   const busy = sync === "syncing";
 
   return (
-    <div className="flex h-full min-h-0 w-full max-w-full flex-col overflow-x-hidden overflow-y-auto">
+    <div className="flex min-h-0 w-full max-w-full flex-col overflow-x-hidden">
       <header className="shrink-0 bg-[#0a0a0a]">
         <div className="border-b border-[#222222] pt-[env(safe-area-inset-top)] md:hidden">
           <div className="flex h-14 max-w-full items-center gap-1.5 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
@@ -393,7 +393,7 @@ export default function Home() {
             <AddForm bereiche={bereiche} disabled={busy} onAdd={handleAdd} />
           </div>
 
-          <div className="flex min-w-0 flex-col overflow-x-hidden max-md:pb-2 md:min-h-0 md:flex-1 md:overflow-y-auto md:overflow-x-hidden">
+          <div className="flex min-w-0 flex-col overflow-x-hidden max-md:pb-2">
             <section className="min-w-0 shrink-0">
               <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
                 Offen

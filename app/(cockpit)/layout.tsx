@@ -7,8 +7,10 @@ export default function CockpitLayout({
 }>) {
   return (
     <CockpitChrome>
-      <div className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-x-hidden md:overflow-visible">
-        {children}
+      <div className="flex h-dvh w-full min-w-0 flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom))]">
+          {children}
+        </div>
       </div>
     </CockpitChrome>
   );
