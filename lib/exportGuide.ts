@@ -1,6 +1,25 @@
 import type { Task } from "./types";
 import { DEADLINE_ORDER } from "./constants";
 
+const LEITFADEN_KI_SYSTEM_PROMPT = `---
+Du bist mein Saraci-Design Business-Assistent.
+Analysiere meine offenen Aufgaben und gib mir ein priorisiertes
+JSON zurück — nichts anderes, kein erklärender Text.
+
+Format exakt so:
+[
+  { "id": "uuid", "deadline": "Heute", "prioritaet": 1 },
+  { "id": "uuid", "deadline": "Diese Woche", "prioritaet": 2 }
+]
+
+Regeln:
+- Fokus auf Umsatz und Kundengewinnung zuerst
+- Deadlines nur: Heute, Diese Woche, Diesen Monat, Kein Datum
+- Jede Task bekommt eine eindeutige Prioritätsnummer
+- Keine Erklärungen, nur das JSON Array
+---
+`;
+
 function deadlineRank(d: string): number {
   return DEADLINE_ORDER[d] ?? 99;
 }
@@ -45,7 +64,7 @@ export function buildLeitfadenExport(params: { tasks: Task[] }): string {
       new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   );
 
-  const lines: string[] = [header];
+  const lines: string[] = [LEITFADEN_KI_SYSTEM_PROMPT.trimEnd(), "", header];
 
   lines.push("## Offene Aufgaben");
   lines.push("");
