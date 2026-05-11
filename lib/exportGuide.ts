@@ -66,7 +66,7 @@ export function buildLeitfadenExport(params: { tasks: Task[] }): string {
           t.deadline?.trim() && t.deadline !== "Kein Datum"
             ? ` — Fokus: ${t.deadline}`
             : "";
-        lines.push(`- [ ] ${t.text}${dl}`);
+        lines.push(`- [ ] ${t.text} [id:${t.id}]${dl}`);
       }
       lines.push("");
     }
@@ -80,7 +80,7 @@ export function buildLeitfadenExport(params: { tasks: Task[] }): string {
   } else {
     for (const t of done) {
       const b = bereichLabel(t);
-      lines.push(`- [x] (${b}) ${t.text}`);
+      lines.push(`- [x] (${b}) ${t.text} [id:${t.id}]`);
     }
     lines.push("");
   }
