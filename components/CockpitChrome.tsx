@@ -3,12 +3,29 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+function TvIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden
+    >
+      <rect x="3" y="5" width="18" height="13" rx="2" />
+      <path d="M8 21h8M12 18v3" />
+    </svg>
+  );
+}
+
 const NAV = [
-  { href: "/", label: "Cockpit" },
-  { href: "/woche", label: "Woche" },
-  { href: "/akquise", label: "Akquise" },
-  { href: "/projekte", label: "Projekte" },
-  { href: "/einstellungen", label: "Einst." },
+  { href: "/", label: "Cockpit", tv: false },
+  { href: "/woche", label: "Woche", tv: false },
+  { href: "/akquise", label: "Akquise", tv: false },
+  { href: "/projekte", label: "Projekte", tv: false },
+  { href: "/dashboard", label: "TV", tv: true },
+  { href: "/einstellungen", label: "Einst.", tv: false },
 ] as const;
 
 function isActive(pathname: string, href: string): boolean {
@@ -30,7 +47,7 @@ function CockpitNavLinks({
   if (variant === "side") {
     return (
       <nav className="flex flex-col gap-0.5">
-        {NAV.map(({ href, label }) => (
+        {NAV.map(({ href, label, tv }) => (
           <Link
             key={href}
             href={href}
@@ -38,7 +55,10 @@ function CockpitNavLinks({
               " "
             )}
           >
-            {label}
+            <span className="inline-flex items-center gap-2">
+              {tv ? <TvIcon className="h-3.5 w-3.5 shrink-0 opacity-80" /> : null}
+              {label}
+            </span>
           </Link>
         ))}
       </nav>
@@ -47,16 +67,17 @@ function CockpitNavLinks({
 
   return (
     <nav className="flex max-w-full items-stretch justify-between gap-0.5 overflow-x-auto px-1">
-      {NAV.map(({ href, label }) => (
+      {NAV.map(({ href, label, tv }) => (
         <Link
           key={href}
           href={href}
           className={[
-            "shrink-0 rounded-md px-2 py-2 text-center font-mono text-[10px] uppercase tracking-wide transition-colors",
+            "flex shrink-0 flex-col items-center justify-center gap-0.5 rounded-md px-1.5 py-1.5 text-center font-mono text-[9px] uppercase leading-none tracking-wide transition-colors",
             isActive(pathname, href) ? active : idle,
           ].join(" ")}
         >
-          {label}
+          {tv ? <TvIcon className="h-4 w-4 shrink-0 opacity-80" /> : null}
+          <span>{label}</span>
         </Link>
       ))}
     </nav>

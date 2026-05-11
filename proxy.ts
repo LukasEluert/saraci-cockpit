@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
+/** Optional: setzt DASHBOARD_KEY in .env — dann Zugriff nur mit ?key=… oder eingeloggt. */
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -20,6 +22,7 @@ export const config = {
   matcher: [
     "/",
     "/login",
+    "/dashboard",
     "/((?!_next/|favicon.ico|manifest.json|icons/).+)",
   ],
 };

@@ -39,6 +39,22 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  const isDashboard =
+    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+
+  if (isDashboard) {
+    const secret = process.env.DASHBOARD_KEY;
+    const keyOk =
+      !secret || request.nextUrl.searchParams.get("key") === secret;
+    if (!keyOk && !user) {
+      return new NextResponse("Nicht autorisiert", {
+        status: 401,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
+    }
+    return supabaseResponse;
+  }
+
   if (!user && pathname !== "/login") {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
