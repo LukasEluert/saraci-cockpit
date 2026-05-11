@@ -308,7 +308,7 @@ export default function Home() {
   const busy = sync === "syncing";
 
   return (
-    <div className="flex w-full max-w-full flex-col max-md:min-h-0 md:h-full md:min-h-0 md:flex-1">
+    <div className="flex h-full min-h-0 w-full max-w-full flex-col overflow-x-hidden overflow-y-auto">
       <header className="shrink-0 bg-[#0a0a0a]">
         <div className="border-b border-[#222222] pt-[env(safe-area-inset-top)] md:hidden">
           <div className="flex h-14 max-w-full items-center gap-1.5 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
@@ -354,7 +354,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-col overflow-x-hidden px-[max(0.75rem,env(safe-area-inset-left))] pb-4 pr-[max(0.75rem,env(safe-area-inset-right))] pt-3 max-md:flex-none max-md:overflow-y-visible md:flex-1 md:overflow-y-auto md:px-[max(1rem,env(safe-area-inset-left))] md:pb-8 md:pr-[max(1rem,env(safe-area-inset-right))] md:pt-0">
+      <div className="flex min-h-0 flex-col overflow-x-hidden px-[max(0.75rem,env(safe-area-inset-left))] pb-4 pr-[max(0.75rem,env(safe-area-inset-right))] pt-3 max-md:flex-none md:flex-1 md:min-h-0 md:px-[max(1rem,env(safe-area-inset-left))] md:pb-8 md:pr-[max(1rem,env(safe-area-inset-right))] md:pt-0">
         <div className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-4 md:max-w-lg md:gap-8">
           {error ? (
             <p className="shrink-0 rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
