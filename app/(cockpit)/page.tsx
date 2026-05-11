@@ -293,6 +293,10 @@ export default function Home() {
     );
   }
 
+  function handleTaskUpdated(updated: Task) {
+    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+  }
+
   async function handleExportCopy() {
     const body = buildLeitfadenExport({ tasks });
     try {
@@ -408,9 +412,12 @@ export default function Home() {
                     <TaskItem
                       key={t.id}
                       task={t}
+                      bereiche={bereiche}
+                      disabled={busy}
                       onToggle={handleToggle}
                       onDelete={handleDelete}
                       onNotizSaved={handleNotizSaved}
+                      onTaskUpdated={handleTaskUpdated}
                     />
                   ))
                 )}
@@ -454,9 +461,12 @@ export default function Home() {
                         <TaskItem
                           key={t.id}
                           task={t}
+                          bereiche={bereiche}
+                          disabled={busy}
                           onToggle={handleToggle}
                           onDelete={handleDelete}
                           onNotizSaved={handleNotizSaved}
+                          onTaskUpdated={handleTaskUpdated}
                         />
                       ))}
                     </div>
