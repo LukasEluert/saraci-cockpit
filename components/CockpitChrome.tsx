@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ComponentType, SVGProps } from "react";
+import { useEffect, useState, type ComponentType, type SVGProps } from "react";
 import { SaraciLogo } from "@/components/SaraciLogo";
 import {
   IconAkquise,
@@ -10,6 +10,7 @@ import {
   IconEinstellungen,
   IconProjekte,
   IconTv,
+  IconSites,
   IconWoche,
 } from "@/components/NavIcons";
 
@@ -23,6 +24,7 @@ const NAV: ReadonlyArray<{
   { href: "/akquise", label: "Akquise", Icon: IconAkquise },
   { href: "/projekte", label: "Projekte", Icon: IconProjekte },
   { href: "/dashboard", label: "Dashboard", Icon: IconTv },
+  { href: "/websites", label: "SITES", Icon: IconSites },
   { href: "/einstellungen", label: "Einst.", Icon: IconEinstellungen },
 ];
 
@@ -33,12 +35,43 @@ function isActive(pathname: string, href: string): boolean {
 
 function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
   const pathname = usePathname();
+  const [sitesState, setSitesState] = useState<"none" | "up" | "down">("none");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/monitors", { cache: "no-store" });
+        if (!res.ok) return;
+        const data: { summary?: { up: number; down: number; total: number } } =
+          await res.json();
+        if (cancelled || !data.summary || data.summary.total === 0) {
+          if (!cancelled) setSitesState("none");
+          return;
+        }
+        if (data.summary.down > 0) {
+          setSitesState("down");
+        } else if (data.summary.up > 0) {
+          setSitesState("up");
+        } else {
+          setSitesState("none");
+        }
+      } catch {
+        if (!cancelled) setSitesState("none");
+      }
+    }
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (variant === "side") {
     return (
       <nav className="flex flex-col gap-0.5">
         {NAV.map(({ href, label, Icon }) => {
           const active = isActive(pathname, href);
+          const showSitesDot = label === "SITES" && sitesState !== "none";
           return (
             <Link
               key={href}
@@ -50,7 +83,18 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
                   : "text-[#666666] hover:bg-[#1a1a1a] hover:text-neutral-100",
               ].join(" ")}
             >
-              <Icon className="h-5 w-5 shrink-0 opacity-90" />
+              <span className="relative inline-flex h-5 w-5 shrink-0 items-center justify-center opacity-90">
+                <Icon className="h-5 w-5" />
+                {showSitesDot ? (
+                  <span
+                    className={[
+                      "absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-black/60",
+                      sitesState === "down" ? "bg-[#e63030]" : "bg-[#22c55e]",
+                    ].join(" ")}
+                    aria-hidden
+                  />
+                ) : null}
+              </span>
               {label}
             </Link>
           );
@@ -63,6 +107,7 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
     <nav className="flex w-full max-w-full items-stretch justify-evenly gap-0 px-1">
       {NAV.map(({ href, label, Icon }) => {
         const active = isActive(pathname, href);
+        const showSitesDot = label === "SITES" && sitesState !== "none";
         return (
           <Link
             key={href}
@@ -72,7 +117,18 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
               active ? "text-[#e63030]" : "text-[#666666]",
             ].join(" ")}
           >
-            <Icon className="h-6 w-6 shrink-0" aria-hidden />
+            <span className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center">
+              <Icon className="h-5 w-5" aria-hidden />
+              {showSitesDot ? (
+                <span
+                  className={[
+                    "absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-black/60",
+                    sitesState === "down" ? "bg-[#e63030]" : "bg-[#22c55e]",
+                  ].join(" ")}
+                  aria-hidden
+                />
+              ) : null}
+            </span>
             <span className="max-w-full truncate text-center">{label}</span>
           </Link>
         );

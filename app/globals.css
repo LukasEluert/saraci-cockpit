@@ -31,6 +31,14 @@ body {
   width: 100%;
 }
 
+/* Safe Area oben (Dynamic Island / Notch) */
+@supports (padding: max(0px)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-top: max(env(safe-area-inset-top), 16px);
+  }
+}
+
 /* Mobile (unter 768px): kein seitlicher Overflow, Formularfelder nutzen die volle Breite */
 @media (max-width: 767px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="color"]),

@@ -50,6 +50,12 @@ function Kpi({
   );
 }
 
+type WebsitesSummary = {
+  total: number;
+  up: number;
+  down: number;
+};
+
 export default function DashboardPage() {
   const [clock, setClock] = useState(() => new Date());
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -57,6 +63,7 @@ export default function DashboardPage() {
   const [projekte, setProjekte] = useState<ProjektRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [webSummary, setWebSummary] = useState<WebsitesSummary | null>(null);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -98,6 +105,33 @@ export default function DashboardPage() {
   useEffect(() => {
     const id = window.setInterval(() => setClock(new Date()), 1000);
     return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadWebsites() {
+      try {
+        const res = await fetch("/api/monitors", { cache: "no-store" });
+        if (!res.ok) return;
+        const data: { summary?: { total: number; up: number; down: number } } =
+          await res.json();
+        if (cancelled || !data.summary || data.summary.total === 0) {
+          if (!cancelled) setWebSummary(null);
+          return;
+        }
+        setWebSummary({
+          total: data.summary.total,
+          up: data.summary.up,
+          down: data.summary.down,
+        });
+      } catch {
+        if (!cancelled) setWebSummary(null);
+      }
+    }
+    void loadWebsites();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const { start: weekStart, end: weekEnd } = useMemo(
@@ -227,6 +261,14 @@ export default function DashboardPage() {
           <Kpi value={loading ? "—" : `${akquiseKpis.rate}%`} label="Akquise Antwortrate" />
           <Kpi value={loading ? "—" : akquiseKpis.openContacts} label="Offene Kontakte" />
           <Kpi value={loading ? "—" : projektKpis.inArbeit} label="Projekte in Arbeit" />
+          <Kpi
+            value={
+              loading || !webSummary
+                ? "—"
+                : `${webSummary.up}/${webSummary.total} online`
+            }
+            label="Websites"
+          />
         </div>
       </div>
 
