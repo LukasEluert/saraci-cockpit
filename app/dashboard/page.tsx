@@ -19,14 +19,6 @@ import { getSupabase } from "@/lib/supabase";
 import { TASKS_LIST_SELECT } from "@/lib/taskSelect";
 import type { AkquiseLogRow, ProjektRow, Task } from "@/lib/types";
 
-function fmtEur(n: number) {
-  return n.toLocaleString("de-DE", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  });
-}
-
 function Kpi({
   value,
   label,
@@ -140,16 +132,10 @@ export default function DashboardPage() {
 
   const projektKpis = useMemo(() => {
     const inArbeit = projekte.filter((p) => p.status === "In Arbeit").length;
-    const umsatzOffen = projekte
-      .filter((p) => p.status !== "Abgeschlossen")
-      .reduce((s, p) => s + p.betrag, 0);
-    const umsatzDone = projekte
-      .filter((p) => p.status === "Abgeschlossen")
-      .reduce((s, p) => s + p.betrag, 0);
     const aktiv = projekte
       .filter((p) => p.status !== "Abgeschlossen")
       .slice(0, 8);
-    return { inArbeit, umsatzOffen, umsatzDone, aktiv };
+    return { inArbeit, aktiv };
   }, [projekte]);
 
   const heuteListe = useMemo(() => {
@@ -227,14 +213,6 @@ export default function DashboardPage() {
           <Kpi value={loading ? "—" : `${akquiseKpis.rate}%`} label="Akquise Antwortrate" />
           <Kpi value={loading ? "—" : akquiseKpis.openContacts} label="Offene Kontakte" />
           <Kpi value={loading ? "—" : projektKpis.inArbeit} label="Projekte in Arbeit" />
-          <Kpi
-            value={loading ? "—" : fmtEur(projektKpis.umsatzOffen)}
-            label="Umsatz offen"
-          />
-          <Kpi
-            value={loading ? "—" : fmtEur(projektKpis.umsatzDone)}
-            label="Umsatz abgeschlossen"
-          />
         </div>
       </div>
 

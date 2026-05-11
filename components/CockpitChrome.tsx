@@ -22,7 +22,7 @@ const NAV: ReadonlyArray<{
   { href: "/woche", label: "Woche", Icon: IconWoche },
   { href: "/akquise", label: "Akquise", Icon: IconAkquise },
   { href: "/projekte", label: "Projekte", Icon: IconProjekte },
-  { href: "/dashboard", label: "TV", Icon: IconTv },
+  { href: "/dashboard", label: "Dashboard", Icon: IconTv },
   { href: "/einstellungen", label: "Einst.", Icon: IconEinstellungen },
 ];
 
