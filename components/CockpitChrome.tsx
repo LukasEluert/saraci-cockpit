@@ -33,45 +33,49 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
-  const pathname = usePathname();
-  const [sitesState, setSitesState] = useState<"none" | "up" | "down">("none");
+type SitesIndicator = "none" | "up" | "down";
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const res = await fetch("/api/monitors", { cache: "no-store" });
-        if (!res.ok) return;
-        const data: { summary?: { up: number; down: number; total: number } } =
-          await res.json();
-        if (cancelled || !data.summary || data.summary.total === 0) {
-          if (!cancelled) setSitesState("none");
-          return;
-        }
-        if (data.summary.down > 0) {
-          setSitesState("down");
-        } else if (data.summary.up > 0) {
-          setSitesState("up");
-        } else {
-          setSitesState("none");
-        }
-      } catch {
-        if (!cancelled) setSitesState("none");
-      }
-    }
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+function deriveSitesIndicator(data: unknown): SitesIndicator {
+  const d = data as {
+    stat?: string;
+    monitors?: Array<{ status?: number }>;
+  };
+  if (d.stat !== "ok" || !Array.isArray(d.monitors) || d.monitors.length === 0) {
+    return "none";
+  }
+  const statuses = d.monitors.map((m) => Number(m.status));
+  if (statuses.some((s) => s === 9)) return "down";
+  if (statuses.every((s) => s === 2)) return "up";
+  return "none";
+}
+
+function CockpitNavLinks({
+  variant,
+  sitesIndicator,
+}: {
+  variant: "side" | "bottom";
+  sitesIndicator: SitesIndicator;
+}) {
+  const pathname = usePathname();
+
+  const sitesDot =
+    sitesIndicator === "none" ? null : (
+      <span
+        className="pointer-events-none absolute -right-0.5 -top-0.5 h-[8px] w-[8px] rounded-full border border-[#0a0a0a]"
+        style={{
+          backgroundColor:
+            sitesIndicator === "down" ? "#e63030" : "#4caf7d",
+        }}
+        aria-hidden
+      />
+    );
 
   if (variant === "side") {
     return (
       <nav className="flex flex-col gap-0.5">
         {NAV.map(({ href, label, Icon }) => {
           const active = isActive(pathname, href);
-          const showSitesDot = label === "SITES" && sitesState !== "none";
+          const showSitesDot = label === "SITES" && sitesIndicator !== "none";
           return (
             <Link
               key={href}
@@ -85,15 +89,7 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
             >
               <span className="relative inline-flex h-5 w-5 shrink-0 items-center justify-center opacity-90">
                 <Icon className="h-5 w-5" />
-                {showSitesDot ? (
-                  <span
-                    className={[
-                      "absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-black/60",
-                      sitesState === "down" ? "bg-[#e63030]" : "bg-[#22c55e]",
-                    ].join(" ")}
-                    aria-hidden
-                  />
-                ) : null}
+                {showSitesDot ? sitesDot : null}
               </span>
               {label}
             </Link>
@@ -107,7 +103,7 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
     <nav className="flex w-full max-w-full items-stretch justify-evenly gap-0 px-1">
       {NAV.map(({ href, label, Icon }) => {
         const active = isActive(pathname, href);
-        const showSitesDot = label === "SITES" && sitesState !== "none";
+        const showSitesDot = label === "SITES" && sitesIndicator !== "none";
         return (
           <Link
             key={href}
@@ -119,15 +115,7 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
           >
             <span className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center">
               <Icon className="h-5 w-5" aria-hidden />
-              {showSitesDot ? (
-                <span
-                  className={[
-                    "absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-black/60",
-                    sitesState === "down" ? "bg-[#e63030]" : "bg-[#22c55e]",
-                  ].join(" ")}
-                  aria-hidden
-                />
-              ) : null}
+              {showSitesDot ? sitesDot : null}
             </span>
             <span className="max-w-full truncate text-center">{label}</span>
           </Link>
@@ -138,6 +126,29 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
 }
 
 export function CockpitChrome({ children }: { children: React.ReactNode }) {
+  const [sitesIndicator, setSitesIndicator] = useState<SitesIndicator>("none");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadMonitors() {
+      try {
+        const res = await fetch("/api/monitors", { cache: "no-store" });
+        if (!res.ok || cancelled) return;
+        const raw: unknown = await res.json();
+        if (cancelled) return;
+        setSitesIndicator(deriveSitesIndicator(raw));
+      } catch {
+        if (!cancelled) setSitesIndicator("none");
+      }
+    }
+    void loadMonitors();
+    const id = window.setInterval(() => void loadMonitors(), 5 * 60 * 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
   return (
     <div className="flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-full flex-col overflow-x-hidden overflow-y-hidden bg-[#0a0a0a] md:h-auto md:max-h-none md:min-h-[100dvh] md:flex-row md:overflow-y-auto">
       <aside className="hidden w-[12.5rem] shrink-0 flex-col border-r border-[#222222] bg-[#111111] md:flex">
@@ -148,7 +159,7 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
           </p>
         </div>
         <div className="px-2 py-3">
-          <CockpitNavLinks variant="side" />
+          <CockpitNavLinks variant="side" sitesIndicator={sitesIndicator} />
         </div>
       </aside>
 
@@ -158,7 +169,7 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
 
       <div className="fixed bottom-0 left-0 right-0 z-40 min-h-[64px] border-t border-[#222222] bg-[#111111]/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-[12px] md:hidden">
         <div className="flex h-full min-h-[64px] w-full max-w-full items-stretch">
-          <CockpitNavLinks variant="bottom" />
+          <CockpitNavLinks variant="bottom" sitesIndicator={sitesIndicator} />
         </div>
       </div>
     </div>
