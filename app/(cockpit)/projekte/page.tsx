@@ -211,7 +211,7 @@ export default function ProjektePage() {
             <button
               type="submit"
               disabled={busy || !kunde.trim()}
-              className="rounded-lg bg-[#e63030] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-white hover:bg-[#c92828] disabled:opacity-40"
+              className="w-full rounded-lg bg-[#e63030] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-white hover:bg-[#c92828] disabled:opacity-40 sm:w-auto"
             >
               Anlegen
             </button>
@@ -262,7 +262,7 @@ function StatBox({ label, value }: { label: string; value: string }) {
       <p className="font-mono text-[10px] uppercase leading-tight tracking-wide text-neutral-500">
         {label}
       </p>
-      <p className="mt-1 font-mono text-xl font-light leading-tight text-neutral-100">
+      <p className="mt-1 font-mono text-xl font-normal tabular-nums leading-tight text-neutral-100">
         {value}
       </p>
     </div>

@@ -358,7 +358,7 @@ export default function Home() {
               <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
                 Offen
               </p>
-              <p className="mt-1 font-mono text-[18px] font-light leading-none text-neutral-100 md:text-3xl">
+              <p className="mt-1 font-mono text-[18px] font-normal tabular-nums leading-none text-neutral-100 md:text-3xl">
                 {stats.offen}
               </p>
             </div>
@@ -366,7 +366,7 @@ export default function Home() {
               <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
                 Heute fällig
               </p>
-              <p className="mt-1 font-mono text-[18px] font-light leading-none text-[#f87171] md:text-3xl">
+              <p className="mt-1 font-mono text-[18px] font-normal tabular-nums leading-none text-[#f87171] md:text-3xl">
                 {stats.heute}
               </p>
             </div>
@@ -374,7 +374,7 @@ export default function Home() {
               <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
                 Diese Woche
               </p>
-              <p className="mt-1 font-mono text-[18px] font-light leading-none text-[#fcd34d] md:text-3xl">
+              <p className="mt-1 font-mono text-[18px] font-normal tabular-nums leading-none text-[#fcd34d] md:text-3xl">
                 {stats.woche}
               </p>
             </div>

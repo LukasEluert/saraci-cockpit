@@ -26,10 +26,16 @@ function Kpi({
   value: string | number;
   label: string;
 }) {
+  const display =
+    typeof value === "number"
+      ? Number.isFinite(value)
+        ? String(value)
+        : "—"
+      : value;
   return (
     <div className="flex min-h-0 flex-col items-center justify-center rounded-lg border border-[#222222] bg-[#111111] px-1 py-2 text-center">
-      <p className="font-mono text-[clamp(1.4rem,4.5vmin,2.75rem)] font-light leading-none tracking-tight text-neutral-100">
-        {value}
+      <p className="font-mono text-[clamp(1.4rem,4.5vmin,2.75rem)] font-normal tabular-nums leading-none tracking-tight text-neutral-100">
+        {display}
       </p>
       <p className="mt-1 max-w-full truncate px-0.5 font-mono text-[clamp(0.55rem,1.1vmin,0.7rem)] uppercase leading-tight tracking-wide text-neutral-500">
         {label}
@@ -170,7 +176,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="flex h-dvh max-h-dvh w-screen max-w-screen flex-col overflow-hidden bg-[#0a0a0a] text-neutral-100">
+    <div className="flex h-full min-h-0 w-full max-w-full min-w-0 flex-col overflow-y-auto overflow-x-hidden bg-[#0a0a0a] text-neutral-100">
       <header className="flex shrink-0 items-center justify-between gap-2 border-b border-[#222222] bg-[#111111] px-[max(0.25rem,env(safe-area-inset-left))] py-1 pr-[max(0.25rem,env(safe-area-inset-right))]">
         <div className="min-w-0">
           <h1 className="truncate font-sans text-[clamp(0.85rem,2vmin,1.1rem)] font-semibold tracking-tight">

@@ -19,6 +19,7 @@ html {
   color-scheme: dark;
   overflow-x: hidden;
   max-width: 100%;
+  width: 100%;
 }
 
 body {
@@ -27,6 +28,19 @@ body {
   font-family: var(--font-sans);
   overflow-x: hidden;
   max-width: 100%;
+  width: 100%;
+}
+
+/* Mobile (unter 768px): kein seitlicher Overflow, Formularfelder nutzen die volle Breite */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
+  select,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
 }
 
 button:active:not(:disabled),

@@ -83,7 +83,7 @@ function CockpitNavLinks({ variant }: { variant: "side" | "bottom" }) {
 
 export function CockpitChrome({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-full flex-col overflow-x-hidden overflow-y-hidden bg-[#0a0a0a] md:h-auto md:max-h-none md:min-h-screen md:overflow-y-auto">
+    <div className="flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-full flex-col overflow-x-hidden overflow-y-hidden bg-[#0a0a0a] md:h-auto md:max-h-none md:min-h-[100dvh] md:flex-row md:overflow-y-auto">
       <aside className="hidden w-[12.5rem] shrink-0 flex-col border-r border-[#222222] bg-[#111111] md:flex">
         <div className="border-b border-[#222222] px-3 py-4">
           <SaraciLogo height={40} priority className="max-w-[9rem]" />
@@ -96,7 +96,7 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] md:min-h-[100dvh] md:overflow-y-visible md:pb-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] md:min-h-[100dvh] md:overflow-y-auto md:pb-0">
         {children}
       </div>
 
