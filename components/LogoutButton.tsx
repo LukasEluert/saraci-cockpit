@@ -33,14 +33,14 @@ export function LogoutButton({ variant = "default", className = "" }: Props) {
         aria-label="Abmelden"
         onClick={() => void handleLogout()}
         disabled={busy}
-        className={`tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#333333] text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40 md:h-11 md:w-11 ${className}`}
+        className={`tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-bg text-fg-muted transition-[border-color,background-color,color] duration-100 ease-out hover:border-border hover:bg-surface-hover hover:text-accent disabled:opacity-40 md:h-10 md:w-10 ${className}`}
       >
         <svg
           className="h-5 w-5"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="1.5"
           aria-hidden
         >
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
@@ -54,7 +54,7 @@ export function LogoutButton({ variant = "default", className = "" }: Props) {
       type="button"
       onClick={() => void handleLogout()}
       disabled={busy}
-      className="tap-scale shrink-0 rounded-lg border border-[#333333] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-400 hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40"
+      className="ui-btn-secondary tap-scale shrink-0 rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide disabled:opacity-40"
     >
       {busy ? "…" : "Abmelden"}
     </button>

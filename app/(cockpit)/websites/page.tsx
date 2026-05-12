@@ -148,14 +148,14 @@ export default function WebsitesPage() {
   }, [summary]);
 
   return (
-    <div className="flex min-h-0 max-w-full flex-1 flex-col overflow-x-hidden bg-[#0a0a0a] px-[max(1rem,env(safe-area-inset-left))] pb-3 max-md:pb-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(env(safe-area-inset-top),16px)] md:pb-8">
+    <div className="flex min-h-0 max-w-full flex-1 flex-col overflow-x-hidden bg-bg px-[max(1rem,env(safe-area-inset-left))] pb-3 max-md:pb-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(env(safe-area-inset-top),16px)] md:pb-8">
       <div className="mx-auto w-full min-w-0 max-w-lg space-y-6">
         <header className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-sans text-xl font-medium tracking-tight text-neutral-100">
+            <h1 className="font-sans text-xl font-medium tracking-tight text-fg">
               Websites
             </h1>
-            <p className="mt-1 font-mono text-[11px] text-neutral-500">
+            <p className="mt-1 font-mono text-[11px] text-fg-muted">
               UptimeRobot · Status &amp; Uptime
             </p>
           </div>
@@ -163,14 +163,14 @@ export default function WebsitesPage() {
             type="button"
             onClick={() => void load()}
             disabled={refreshing}
-            className="tap-scale shrink-0 rounded-lg border border-[#333333] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-200 hover:border-[#e63030] hover:text-white disabled:opacity-40"
+            className="tap-scale shrink-0 rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-fg hover:border-accent hover:text-white disabled:opacity-40"
           >
             {refreshing ? "Lädt …" : "Aktualisieren"}
           </button>
         </header>
 
         {error ? (
-          <p className="rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
+          <p className="rounded-lg border border-accent/30 bg-accent-dim px-3 py-2 font-mono text-[12px] text-accent">
             {error}
           </p>
         ) : null}
@@ -189,14 +189,14 @@ export default function WebsitesPage() {
           />
         </section>
 
-        <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+        <section className="rounded-xl border border-border-subtle bg-surface p-4">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
             Monitore
           </h2>
           {loading ? (
-            <p className="mt-3 font-mono text-[12px] text-neutral-500">Lade …</p>
+            <p className="mt-3 font-mono text-[12px] text-fg-muted">Lade …</p>
           ) : monitors.length === 0 ? (
-            <p className="mt-3 font-sans text-sm text-neutral-500">
+            <p className="mt-3 font-sans text-sm text-fg-muted">
               Keine Monitore gefunden. Bitte UptimeRobot-Konfiguration prüfen.
             </p>
           ) : (
@@ -204,20 +204,20 @@ export default function WebsitesPage() {
               {monitors.map((m) => (
                 <li
                   key={m.id}
-                  className="rounded-lg border border-[#222222] bg-[#0f0f0f] px-3 py-2.5"
+                  className="rounded-lg border border-border-subtle bg-[#0f0f0f] px-3 py-2.5"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="truncate font-sans text-[15px] text-neutral-100">
+                      <p className="truncate font-sans text-[15px] text-fg">
                         {m.name}
                       </p>
-                      <p className="mt-0.5 truncate font-mono text-[11px] text-neutral-500">
+                      <p className="mt-0.5 truncate font-mono text-[11px] text-fg-muted">
                         {m.url}
                       </p>
                     </div>
                     <StatusBadge status={m.status} />
                   </div>
-                  <p className="mt-1.5 font-mono text-[11px] text-neutral-400">
+                  <p className="mt-1.5 font-mono text-[11px] text-fg-muted">
                     Uptime 24h:{" "}
                     <span className="tabular-nums">
                       {m.uptime24h.toFixed(1)}
@@ -246,8 +246,8 @@ function StatCard({
   const color =
     tone === "up" ? "#22c55e" : tone === "down" ? "#e63030" : "#e5e5e5";
   return (
-    <div className="rounded-xl border border-[#222222] bg-[#111111] px-3 py-3">
-      <p className="font-mono text-[10px] uppercase leading-tight tracking-wide text-neutral-500">
+    <div className="rounded-xl border border-border-subtle bg-surface px-3 py-3">
+      <p className="font-mono text-[10px] uppercase leading-tight tracking-wide text-fg-muted">
         {label}
       </p>
       <p
@@ -282,7 +282,7 @@ function StatusBadge({ status }: { status: MonitorStatus }) {
   return (
     <span
       className={[
-        "inline-flex items-center gap-1 rounded-full border border-[#333333] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide",
+        "inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide",
         bg,
       ].join(" ")}
       style={{ color }}

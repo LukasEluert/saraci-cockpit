@@ -13,14 +13,14 @@ export function WeekReviewModal({ open, onClose }: Props) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 p-4"
+      className="ui-modal-backdrop fixed inset-0 z-[120] flex items-center justify-center p-4"
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="w-[90vw] max-w-md"
+        className="ui-animate-modal w-[92vw] max-w-lg"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <WeekReviewPanel

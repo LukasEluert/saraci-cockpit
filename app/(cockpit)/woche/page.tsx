@@ -102,19 +102,19 @@ export default function WochePage() {
   });
 
   return (
-    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-[#0a0a0a] px-[max(1rem,env(safe-area-inset-left))] pb-3 max-md:pb-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] md:min-h-[100dvh] md:pb-8">
+    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-bg px-[max(1rem,env(safe-area-inset-left))] pb-3 max-md:pb-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] md:min-h-[100dvh] md:pb-8">
       <div className="mx-auto w-full min-w-0 max-w-lg space-y-8">
         <header>
-          <h1 className="font-sans text-xl font-medium tracking-tight text-neutral-100">
+          <h1 className="font-sans text-xl font-medium tracking-tight text-fg">
             Wochenübersicht
           </h1>
-          <p className="mt-1 font-mono text-[11px] text-neutral-500">
+          <p className="mt-1 font-mono text-[11px] text-fg-muted">
             {labelStart} – {labelEnd}
           </p>
         </header>
 
         {err ? (
-          <p className="rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
+          <p className="rounded-lg border border-accent/30 bg-accent-dim px-3 py-2 font-mono text-[12px] text-accent">
             {err}
           </p>
         ) : null}
@@ -127,25 +127,25 @@ export default function WochePage() {
         </section>
 
         {loading ? (
-          <p className="font-mono text-[12px] text-neutral-500">Lade …</p>
+          <p className="font-mono text-[12px] text-fg-muted">Lade …</p>
         ) : (
           <>
-            <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
-              <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+            <section className="rounded-xl border border-border-subtle bg-surface p-4">
+              <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
                 Erledigt diese Woche
               </h2>
               <ul className="mt-3 space-y-2">
                 {erledigt.length === 0 ? (
-                  <li className="font-sans text-sm text-neutral-500">
+                  <li className="font-sans text-sm text-fg-muted">
                     Keine Einträge.
                   </li>
                 ) : (
                   erledigt.map((t) => (
                     <li
                       key={t.id}
-                      className="border-b border-[#222222] py-2 font-sans text-sm text-neutral-300 last:border-0"
+                      className="border-b border-border-subtle py-2 font-sans text-sm text-fg-muted last:border-0"
                     >
-                      <span className="text-neutral-500">
+                      <span className="text-fg-muted">
                         {new Date(t.updated_at).toLocaleDateString("de-DE")}
                       </span>{" "}
                       · {t.text}
@@ -155,22 +155,22 @@ export default function WochePage() {
               </ul>
             </section>
 
-            <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
-              <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+            <section className="rounded-xl border border-border-subtle bg-surface p-4">
+              <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
                 Offen diese Woche
               </h2>
               <ul className="mt-3 space-y-2">
                 {offenWoche.length === 0 ? (
-                  <li className="font-sans text-sm text-neutral-500">
+                  <li className="font-sans text-sm text-fg-muted">
                     Keine Einträge.
                   </li>
                 ) : (
                   offenWoche.map((t) => (
                     <li
                       key={t.id}
-                      className="border-b border-[#222222] py-2 font-sans text-sm text-neutral-300 last:border-0"
+                      className="border-b border-border-subtle py-2 font-sans text-sm text-fg-muted last:border-0"
                     >
-                      <span className="font-mono text-[10px] text-neutral-500">
+                      <span className="font-mono text-[10px] text-fg-muted">
                         {bereichName(t) || "—"}
                       </span>{" "}
                       · {t.text}
@@ -180,20 +180,20 @@ export default function WochePage() {
               </ul>
             </section>
 
-            <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
-              <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+            <section className="rounded-xl border border-border-subtle bg-surface p-4">
+              <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
                 Akquise (offen, diese Woche)
               </h2>
               <ul className="mt-3 space-y-2">
                 {akquise.length === 0 ? (
-                  <li className="font-sans text-sm text-neutral-500">
+                  <li className="font-sans text-sm text-fg-muted">
                     Keine Einträge.
                   </li>
                 ) : (
                   akquise.map((t) => (
                     <li
                       key={t.id}
-                      className="border-b border-[#222222] py-2 font-sans text-sm text-neutral-300 last:border-0"
+                      className="border-b border-border-subtle py-2 font-sans text-sm text-fg-muted last:border-0"
                     >
                       {t.text}
                     </li>
@@ -210,11 +210,11 @@ export default function WochePage() {
 
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[#222222] bg-[#111111] px-3 py-3">
-      <p className="font-mono text-[10px] uppercase leading-tight tracking-wide text-neutral-500">
+    <div className="rounded-xl border border-border-subtle bg-surface px-3 py-3">
+      <p className="font-mono text-[10px] uppercase leading-tight tracking-wide text-fg-muted">
         {label}
       </p>
-      <p className="mt-1 font-mono text-2xl font-normal tabular-nums leading-tight text-neutral-100">
+      <p className="mt-1 font-mono text-2xl font-normal tabular-nums leading-tight text-fg">
         {value}
       </p>
     </div>

@@ -136,34 +136,34 @@ export default function EinstellungenPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-[#0a0a0a] px-[max(1rem,env(safe-area-inset-left))] pb-3 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] max-md:pb-4 md:min-h-[100dvh] md:pb-8">
+    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-bg px-[max(1rem,env(safe-area-inset-left))] pb-3 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] max-md:pb-4 md:min-h-[100dvh] md:pb-8">
       <div className="mx-auto w-full min-w-0 max-w-lg space-y-8">
         <header>
-          <h1 className="font-sans text-xl font-medium tracking-tight text-neutral-100">
+          <h1 className="font-sans text-xl font-medium tracking-tight text-fg">
             Einstellungen
           </h1>
-          <p className="mt-1 font-mono text-[11px] text-neutral-500">
+          <p className="mt-1 font-mono text-[11px] text-fg-muted">
             Bereiche verwalten
           </p>
         </header>
 
         {err ? (
-          <p className="rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
+          <p className="rounded-lg border border-accent/30 bg-accent-dim px-3 py-2 font-mono text-[12px] text-accent">
             {err}
           </p>
         ) : null}
 
-        <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+        <section className="rounded-xl border border-border-subtle bg-surface p-4">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
             Navigation
           </h2>
-          <p className="mt-2 font-sans text-[13px] text-neutral-400">
+          <p className="mt-2 font-sans text-[13px] text-fg-muted">
             Ausgeblendete Bereiche erscheinen nicht in der Sidebar und in der
             mobilen unteren Navigation.
           </p>
           <div className="mt-4 space-y-3">
-            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-3">
-              <span className="font-mono text-[12px] uppercase tracking-wide text-neutral-200">
+            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border-subtle bg-bg px-3 py-3">
+              <span className="font-mono text-[12px] uppercase tracking-wide text-fg">
                 Akquise anzeigen
               </span>
               <input
@@ -174,11 +174,11 @@ export default function EinstellungenPage() {
                   setShowAkquise(v);
                   writeShowAkquise(v);
                 }}
-                className="h-4 w-4 shrink-0 rounded border-[#404040] bg-[#111111] text-[#e63030] focus:ring-[#e63030]"
+                className="h-4 w-4 shrink-0 rounded border-border bg-surface text-accent focus:ring-accent/30"
               />
             </label>
-            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-3">
-              <span className="font-mono text-[12px] uppercase tracking-wide text-neutral-200">
+            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border-subtle bg-bg px-3 py-3">
+              <span className="font-mono text-[12px] uppercase tracking-wide text-fg">
                 Projekte anzeigen
               </span>
               <input
@@ -189,23 +189,23 @@ export default function EinstellungenPage() {
                   setShowProjekte(v);
                   writeShowProjekte(v);
                 }}
-                className="h-4 w-4 shrink-0 rounded border-[#404040] bg-[#111111] text-[#e63030] focus:ring-[#e63030]"
+                className="h-4 w-4 shrink-0 rounded border-border bg-surface text-accent focus:ring-accent/30"
               />
             </label>
           </div>
         </section>
 
-        <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+        <section className="rounded-xl border border-border-subtle bg-surface p-4">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
             Wochenrückblick
           </h2>
-          <p className="mt-2 font-sans text-[13px] text-neutral-400">
+          <p className="mt-2 font-sans text-[13px] text-fg-muted">
             Auswertung der aktuellen Kalenderwoche: erledigte und offene Tasks,
             Akquise und Motivation.
           </p>
           <Link
             href="/wochenrueckblick"
-            className="mt-4 inline-flex rounded-lg border border-[#333333] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white"
+            className="mt-4 inline-flex rounded-lg border border-border px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-fg transition-colors hover:border-accent hover:text-white"
           >
             Wochenrückblick anzeigen
           </Link>
@@ -215,25 +215,25 @@ export default function EinstellungenPage() {
 
         <form
           onSubmit={handleAdd}
-          className="space-y-4 rounded-xl border border-[#222222] bg-[#111111] p-4"
+          className="space-y-4 rounded-xl border border-border-subtle bg-surface p-4"
         >
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
             Neuer Bereich
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
-              <span className="font-mono text-[10px] uppercase text-neutral-500">
+              <span className="font-mono text-[10px] uppercase text-fg-muted">
                 Name
               </span>
               <input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 disabled={busy}
-                className="mt-1 max-h-11 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                className="mt-1 max-h-11 w-full rounded-lg border border-border-subtle bg-bg px-3 py-2 font-sans text-sm text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
               />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] uppercase text-neutral-500">
+              <span className="font-mono text-[10px] uppercase text-fg-muted">
                 Farbe (Hex)
               </span>
               <div className="mt-1 flex gap-2">
@@ -242,14 +242,14 @@ export default function EinstellungenPage() {
                   value={newFarbe.length === 7 ? newFarbe : "#e63030"}
                   onChange={(e) => setNewFarbe(e.target.value)}
                   disabled={busy}
-                  className="box-border h-9 w-9 shrink-0 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] disabled:opacity-50 md:h-10 md:w-12"
+                  className="box-border h-9 w-9 shrink-0 cursor-pointer rounded border border-border bg-bg disabled:opacity-50 md:h-10 md:w-12"
                 />
                 <input
                   value={newFarbe}
                   onChange={(e) => setNewFarbe(e.target.value)}
                   disabled={busy}
                   placeholder="#e63030"
-                  className="min-w-0 max-h-11 flex-1 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-mono text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                  className="min-w-0 max-h-11 flex-1 rounded-lg border border-border-subtle bg-bg px-3 py-2 font-mono text-sm text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
                 />
               </div>
             </label>
@@ -258,7 +258,7 @@ export default function EinstellungenPage() {
             <button
               type="submit"
               disabled={busy || !newName.trim()}
-              className="rounded-lg bg-[#e63030] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-white hover:bg-[#c92828] disabled:opacity-40"
+              className="ui-btn-primary tap-scale rounded-md px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide disabled:opacity-40"
             >
               Hinzufügen
             </button>
@@ -266,11 +266,11 @@ export default function EinstellungenPage() {
         </form>
 
         <section>
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
             Bereiche
           </h2>
           {loading ? (
-            <p className="mt-3 font-mono text-[12px] text-neutral-500">
+            <p className="mt-3 font-mono text-[12px] text-fg-muted">
               Lade …
             </p>
           ) : (
@@ -315,14 +315,14 @@ function BereichEditorRow({
   const colorValue = /^#[0-9a-fA-F]{6}$/.test(farbe) ? farbe : "#525252";
 
   return (
-    <li className="rounded-lg border border-[#222222] bg-[#111111] px-2 py-1.5 md:p-3">
+    <li className="rounded-lg border border-border-subtle bg-surface px-2 py-1.5 md:p-3">
       <div className="flex items-center justify-between gap-2 md:hidden">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={busy}
           placeholder="Name"
-          className="min-h-0 min-w-0 max-h-11 flex-1 rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-2 font-sans text-sm text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+          className="min-h-0 min-w-0 max-h-11 flex-1 rounded-lg border border-border-subtle bg-bg px-2 py-2 font-sans text-sm text-fg placeholder:text-fg-subtle focus:border-accent/50 focus:outline-none disabled:opacity-50"
         />
         <div className="flex shrink-0 items-center gap-1">
           <input
@@ -331,7 +331,7 @@ function BereichEditorRow({
             onChange={(e) => setFarbe(e.target.value)}
             disabled={busy}
             aria-label="Farbe"
-            className="box-border h-9 w-9 shrink-0 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] p-0 disabled:opacity-50"
+            className="box-border h-9 w-9 shrink-0 cursor-pointer rounded border border-border bg-bg p-0 disabled:opacity-50"
           />
           <BereichIconButton
             label="Speichern"
@@ -351,18 +351,18 @@ function BereichEditorRow({
       <div className="hidden md:block">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="block min-w-0 flex-1">
-          <span className="font-mono text-[10px] uppercase text-neutral-500">
+          <span className="font-mono text-[10px] uppercase text-fg-muted">
             Name
           </span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={busy}
-            className="mt-1 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+            className="mt-1 w-full rounded-lg border border-border-subtle bg-bg px-3 py-2 font-sans text-sm text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
           />
         </label>
         <label className="block sm:w-40">
-          <span className="font-mono text-[10px] uppercase text-neutral-500">
+          <span className="font-mono text-[10px] uppercase text-fg-muted">
             Farbe
           </span>
           <div className="mt-1 flex gap-2">
@@ -371,13 +371,13 @@ function BereichEditorRow({
               value={colorValue}
               onChange={(e) => setFarbe(e.target.value)}
               disabled={busy}
-              className="h-10 w-12 shrink-0 cursor-pointer rounded border border-[#333333] bg-[#0a0a0a] disabled:opacity-50"
+              className="h-10 w-12 shrink-0 cursor-pointer rounded border border-border bg-bg disabled:opacity-50"
             />
             <input
               value={farbe}
               onChange={(e) => setFarbe(e.target.value)}
               disabled={busy}
-              className="min-w-0 flex-1 rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-2 font-mono text-[12px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+              className="min-w-0 flex-1 rounded-lg border border-border-subtle bg-bg px-2 py-2 font-mono text-[12px] text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
             />
           </div>
         </label>
@@ -386,7 +386,7 @@ function BereichEditorRow({
             type="button"
             disabled={busy || !dirty}
             onClick={() => onSave(row, name, farbe)}
-            className="rounded-lg border border-[#333333] px-3 py-2 font-mono text-[11px] uppercase tracking-wide text-neutral-200 hover:border-[#e63030] hover:text-white disabled:opacity-40"
+            className="rounded-lg border border-border px-3 py-2 font-mono text-[11px] uppercase tracking-wide text-fg hover:border-accent hover:text-white disabled:opacity-40"
           >
             Speichern
           </button>
@@ -394,7 +394,7 @@ function BereichEditorRow({
             type="button"
             disabled={busy}
             onClick={() => void onDelete(row)}
-            className="rounded-lg border border-[#333333] px-3 py-2 font-mono text-[11px] uppercase tracking-wide text-neutral-500 hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40"
+            className="rounded-lg border border-border px-3 py-2 font-mono text-[11px] uppercase tracking-wide text-fg-muted hover:border-accent hover:text-accent disabled:opacity-40"
           >
             Löschen
           </button>
@@ -423,7 +423,7 @@ function BereichIconButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#333333] text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40 md:h-10 md:w-10"
+      className="tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-fg-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-40 md:h-10 md:w-10"
     >
       {variant === "save" ? (
         <svg

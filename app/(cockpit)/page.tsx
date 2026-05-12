@@ -69,19 +69,13 @@ function sortOpenTasks(list: Task[]): Task[] {
   });
 }
 
-function SyncDot({
-  status,
-  compact,
-}: {
-  status: SyncState;
-  compact?: boolean;
-}) {
+function SyncDot({ status }: { status: SyncState }) {
   const color =
     status === "ok"
-      ? "bg-[#22c55e]"
+      ? "bg-green"
       : status === "syncing"
-        ? "bg-[#eab308]"
-        : "bg-[#e63030]";
+        ? "bg-amber"
+        : "bg-accent";
   const label =
     status === "ok"
       ? "Verbunden"
@@ -90,25 +84,16 @@ function SyncDot({
         : "Fehler";
 
   return (
-    <span
-      className="inline-flex items-center gap-1.5"
-      title={label}
-    >
+    <span className="inline-flex items-center gap-1.5" title={label}>
       <span
         className={[
-          "inline-block h-2.5 w-2.5 shrink-0 rounded-full",
+          "inline-block h-[5px] w-[5px] shrink-0 rounded-full",
           color,
           status === "syncing" ? "animate-pulse" : "",
         ].join(" ")}
         aria-hidden
       />
-      {compact ? (
-        <span className="sr-only">{label}</span>
-      ) : (
-        <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-          {label}
-        </span>
-      )}
+      <span className="sr-only">{label}</span>
     </span>
   );
 }
@@ -495,26 +480,23 @@ export default function Home() {
   const busy = sync === "syncing";
 
   const kiImportBtnClass =
-    "tap-scale rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40";
+    "ui-btn-secondary tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide disabled:opacity-40";
 
   return (
     <div className="flex min-h-0 w-full max-w-full flex-col overflow-x-hidden">
-      <header className="shrink-0 bg-[#0a0a0a]">
-        <div className="border-b border-[#222222] pt-[env(safe-area-inset-top)] md:hidden">
-          <div className="flex h-14 max-w-full items-center gap-1.5 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
+      <header className="shrink-0 bg-bg">
+        <div className="border-b border-border-subtle pt-[env(safe-area-inset-top)] md:hidden">
+          <div className="flex h-12 max-w-full items-center gap-2 px-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
             <SaraciLogo
-              height={28}
+              height={26}
               priority
-              className="max-h-[28px] shrink-0 object-contain"
+              className="max-h-[26px] shrink-0 object-contain"
             />
-            <h1 className="min-w-0 flex-1 truncate font-mono text-[10px] font-semibold uppercase leading-tight tracking-wide text-neutral-100">
-              Saraci Cockpit
-            </h1>
-            <div className="flex shrink-0 items-center gap-1">
-              <SyncDot status={sync} compact />
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+              <SyncDot status={sync} />
               <time
                 dateTime={new Date().toISOString()}
-                className="whitespace-nowrap font-mono text-[10px] tabular-nums text-neutral-400"
+                className="whitespace-nowrap font-mono text-xs tabular-nums text-fg-subtle"
               >
                 {datumMobile}
               </time>
@@ -523,47 +505,43 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="hidden max-w-full flex-col gap-3 px-[max(1rem,env(safe-area-inset-left))] pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] md:flex">
-          <div className="flex items-start justify-between gap-4">
+        <div className="hidden min-h-[52px] max-w-full flex-col justify-center border-b border-border-subtle px-[max(1rem,env(safe-area-inset-left))] py-2 pr-[max(1rem,env(safe-area-inset-right))] md:flex">
+          <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="font-sans text-xl font-medium tracking-tight text-neutral-100">
+              <h1 className="font-sans text-lg font-medium tracking-tight text-fg md:text-xl">
                 Saraci Cockpit
               </h1>
-              <p className="mt-1 font-mono text-[11px] text-neutral-500">
+              <p className="mt-0.5 font-mono text-[11px] text-fg-muted">
                 Aufgaben · Supabase
               </p>
             </div>
-            <div className="flex max-w-full shrink-0 flex-col items-end gap-3">
-              <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
-                <LogoutButton />
-                <SyncDot status={sync} />
-              </div>
-              <div className="flex max-w-full flex-col items-end gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-                <DataExportButtons disabled={busy} />
-                <button
-                  type="button"
-                  onClick={() => setKiImportOpen(true)}
-                  disabled={busy}
-                  className={kiImportBtnClass}
-                >
-                  KI-Import
-                </button>
-              </div>
+            <div className="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-3">
+              <DataExportButtons disabled={busy} />
+              <button
+                type="button"
+                onClick={() => setKiImportOpen(true)}
+                disabled={busy}
+                className={kiImportBtnClass}
+              >
+                KI-Import
+              </button>
+              <LogoutButton />
+              <SyncDot status={sync} />
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-col overflow-x-hidden px-[max(0.75rem,env(safe-area-inset-left))] pb-4 pr-[max(0.75rem,env(safe-area-inset-right))] pt-3 max-md:flex-none md:flex-1 md:min-h-0 md:px-[max(1rem,env(safe-area-inset-left))] md:pb-8 md:pr-[max(1rem,env(safe-area-inset-right))] md:pt-0">
+      <div className="flex min-h-0 flex-col overflow-x-hidden px-[max(0.75rem,env(safe-area-inset-left))] pb-[calc(76px+env(safe-area-inset-bottom,0px))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-3 max-md:flex-none md:flex-1 md:min-h-0 md:px-[max(1rem,env(safe-area-inset-left))] md:pb-8 md:pr-[max(1rem,env(safe-area-inset-right))] md:pt-0">
         <div className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-4 md:max-w-lg md:gap-8">
           {error ? (
-            <p className="shrink-0 rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
+            <p className="shrink-0 rounded-md border border-accent/30 bg-accent-dim px-3 py-2 font-mono text-[12px] text-accent">
               {error}
             </p>
           ) : null}
           {kiImportNotice ? (
             <p
-              className="shrink-0 rounded-lg border border-[#166534]/50 bg-[#0f1f14] px-3 py-2 font-mono text-[12px] text-[#86efac]"
+              className="shrink-0 rounded-md border border-green/30 bg-green-dim px-3 py-2 font-mono text-[12px] text-green"
               role="status"
             >
               {kiImportNotice}
@@ -580,29 +558,17 @@ export default function Home() {
           ) : null}
 
           <section className="grid w-full max-w-full shrink-0 grid-cols-3 gap-2 md:gap-3">
-            <div className="min-w-0 rounded-xl border border-[#222222] bg-[#111111] px-2 py-3 md:px-3 md:py-4">
-              <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
-                Offen
-              </p>
-              <p className="mt-1 font-mono text-[18px] font-normal tabular-nums leading-none text-neutral-100 md:text-3xl">
-                {stats.offen}
-              </p>
+            <div className="ui-stat-card min-w-0">
+              <p className="ui-stat-value">{stats.offen}</p>
+              <p className="ui-stat-label">Offen</p>
             </div>
-            <div className="min-w-0 rounded-xl border border-[#222222] bg-[#111111] px-2 py-3 md:px-3 md:py-4">
-              <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
-                Heute fällig
-              </p>
-              <p className="mt-1 font-mono text-[18px] font-normal tabular-nums leading-none text-[#f87171] md:text-3xl">
-                {stats.heute}
-              </p>
+            <div className="ui-stat-card min-w-0">
+              <p className="ui-stat-value text-accent">{stats.heute}</p>
+              <p className="ui-stat-label">Heute fällig</p>
             </div>
-            <div className="min-w-0 rounded-xl border border-[#222222] bg-[#111111] px-2 py-3 md:px-3 md:py-4">
-              <p className="font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
-                Diese Woche
-              </p>
-              <p className="mt-1 font-mono text-[18px] font-normal tabular-nums leading-none text-[#fcd34d] md:text-3xl">
-                {stats.woche}
-              </p>
+            <div className="ui-stat-card min-w-0">
+              <p className="ui-stat-value text-amber">{stats.woche}</p>
+              <p className="ui-stat-label">Diese Woche</p>
             </div>
           </section>
 
@@ -613,19 +579,15 @@ export default function Home() {
           <div className="flex min-w-0 flex-col overflow-x-hidden max-md:pb-2">
             <section className="min-w-0 shrink-0">
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-                  Offen
-                </h2>
+                <h2 className="ui-label-upper">Offen</h2>
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <label className="flex min-w-0 max-w-full items-center gap-2">
-                    <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-neutral-500">
-                      Kunde
-                    </span>
+                    <span className="ui-label-upper shrink-0">Kunde</span>
                     <select
                       value={kundeFilter}
                       onChange={(e) => setKundeFilter(e.target.value)}
                       disabled={busy}
-                      className="max-w-[12rem] min-w-0 flex-1 appearance-none rounded-lg border border-[#333333] bg-[#0a0a0a] px-2 py-1.5 font-sans text-[12px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-40 sm:max-w-[14rem]"
+                      className="ui-select max-w-[12rem] min-w-0 flex-1 font-sans text-[13px] disabled:opacity-40 sm:max-w-[14rem]"
                       aria-label="Nach Kunde filtern"
                     >
                       <option value="">Alle Kunden</option>
@@ -637,7 +599,7 @@ export default function Home() {
                     </select>
                   </label>
                   <div
-                    className="flex shrink-0 rounded-lg border border-[#333333] bg-[#0a0a0a] p-0.5"
+                    className="flex shrink-0 rounded-md border border-border bg-bg p-0.5"
                     role="group"
                     aria-label="Liste filtern"
                   >
@@ -646,10 +608,10 @@ export default function Home() {
                       onClick={() => setOpenListFilter("all")}
                       aria-pressed={openListFilter === "all"}
                       className={[
-                        "tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
+                        "tap-scale rounded px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-[background-color,color] duration-150 ease-out",
                         openListFilter === "all"
-                          ? "bg-[#222222] text-neutral-100"
-                          : "text-neutral-500 hover:text-neutral-300",
+                          ? "bg-surface-hover text-fg"
+                          : "text-fg-muted hover:text-fg",
                       ].join(" ")}
                     >
                       Alle
@@ -659,10 +621,10 @@ export default function Home() {
                       onClick={() => setOpenListFilter("heute")}
                       aria-pressed={openListFilter === "heute"}
                       className={[
-                        "tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
+                        "tap-scale rounded px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-[background-color,color] duration-150 ease-out",
                         openListFilter === "heute"
-                          ? "bg-[#222222] text-[#f87171]"
-                          : "text-neutral-500 hover:text-neutral-300",
+                          ? "bg-accent-dim text-accent"
+                          : "text-fg-muted hover:text-fg",
                       ].join(" ")}
                     >
                       Heute
@@ -672,7 +634,7 @@ export default function Home() {
               </div>
               <div className="mt-3 flex min-w-0 flex-col gap-2">
                 {openTasks.length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-[#333333] px-3 py-6 text-center font-sans text-sm text-neutral-500">
+                  <p className="rounded-md border border-dashed border-border-subtle bg-surface/50 px-3 py-6 text-center font-sans text-sm text-fg-muted">
                     {openListFilter === "heute" && openByKunde.length > 0
                       ? "Keine offenen Tasks mit Deadline „Heute“."
                       : kundeFilter &&
@@ -699,23 +661,23 @@ export default function Home() {
             </section>
 
             <section className="mt-4 min-w-0 shrink-0">
-            <details className="group rounded-xl border border-[#222222] bg-[#111111]">
-              <summary className="tap-scale cursor-pointer list-none px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-neutral-400 [&::-webkit-details-marker]:hidden">
+            <details className="group rounded-lg border border-border-subtle bg-surface transition-[border-color,background-color] duration-100 ease-out hover:border-border hover:bg-surface-hover">
+              <summary className="tap-scale cursor-pointer list-none px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-fg-muted transition-colors duration-150 ease-out hover:text-fg [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center justify-between gap-2">
                   <span>
                     Erledigt
-                    <span className="ml-2 text-neutral-600">
+                    <span className="ml-2 text-fg-subtle">
                       ({doneTasks.length})
                     </span>
                   </span>
-                  <span className="text-neutral-600 transition-transform duration-150 group-open:rotate-180">
+                  <span className="text-fg-subtle transition-transform duration-150 ease-out group-open:rotate-180">
                     ⌄
                   </span>
                 </span>
               </summary>
-              <div className="border-t border-[#222222] px-3 pb-3 pt-3">
+              <div className="border-t border-border-subtle px-3 pb-3 pt-3">
                 {doneTasks.length === 0 ? (
-                  <p className="py-4 text-center font-sans text-sm text-neutral-500">
+                  <p className="py-4 text-center font-sans text-sm text-fg-muted">
                     Noch keine erledigten Aufgaben.
                   </p>
                 ) : (
@@ -725,7 +687,7 @@ export default function Home() {
                         type="button"
                         onClick={handleDeleteAllDone}
                         disabled={busy}
-                        className="tap-scale rounded-lg border border-[#333333] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-400 transition-colors hover:border-[#e63030] hover:text-[#e63030] disabled:opacity-40"
+                        className="ui-btn-secondary tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide disabled:opacity-40"
                       >
                         Alle erledigten löschen
                       </button>
@@ -750,11 +712,9 @@ export default function Home() {
             </details>
             </section>
 
-            <section className="mt-4 min-w-0 shrink-0 rounded-xl border border-[#333333] bg-[#141414] p-4 max-md:mb-2">
-            <h2 className="font-mono text-[11px] font-medium uppercase tracking-wide text-neutral-200">
-              Export für Leitfaden
-            </h2>
-            <p className="mt-2 font-sans text-sm leading-relaxed text-neutral-300">
+            <section className="mt-4 min-w-0 shrink-0 rounded-lg border border-border-subtle bg-surface p-4 shadow-[var(--stat-inset)] max-md:mb-2">
+            <h2 className="ui-label-upper text-fg">Export für Leitfaden</h2>
+            <p className="mt-2 font-sans text-sm leading-relaxed text-fg-muted">
               Kopiert strukturierten Text für z. B. Claude (Markdown-Abschnitte,
               Bereiche, Checkboxen).
             </p>
@@ -763,7 +723,7 @@ export default function Home() {
                 type="button"
                 onClick={handleExportCopy}
                 disabled={busy}
-                className="tap-scale w-full max-h-11 rounded-lg border border-[#e63030]/50 bg-[#1a1a1a] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-neutral-100 transition-colors hover:border-[#e63030] hover:bg-[#222222] hover:text-white disabled:opacity-40"
+                className="ui-btn-primary tap-scale w-full max-h-11 rounded-md px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide disabled:opacity-40"
               >
                 {copyNotice ? "In Zwischenablage kopiert" : "Text kopieren"}
               </button>
@@ -771,7 +731,7 @@ export default function Home() {
                 type="button"
                 onClick={() => setKiImportOpen(true)}
                 disabled={busy}
-                className="tap-scale w-full max-h-11 rounded-lg border border-[#333333] bg-[#0a0a0a] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40"
+                className="ui-btn-secondary tap-scale w-full max-h-11 rounded-md px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide disabled:opacity-40"
               >
                 KI-Import
               </button>

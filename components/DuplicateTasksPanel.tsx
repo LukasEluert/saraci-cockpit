@@ -84,11 +84,9 @@ export function DuplicateTasksPanel() {
   }
 
   return (
-    <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
-      <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-        Task-Duplikate
-      </h2>
-      <p className="mt-2 font-sans text-[13px] leading-relaxed text-neutral-400">
+    <section className="rounded-lg border border-border-subtle bg-surface p-4 shadow-[var(--stat-inset)]">
+      <h2 className="ui-label-upper">Task-Duplikate</h2>
+      <p className="mt-2 font-sans text-[13px] leading-relaxed text-fg-muted">
         Gleicher Aufgabentext (ohne Groß-/Kleinschreibung, getrimmt). Pro Gruppe
         die überzähligen Einträge zum Löschen markieren — mindestens eine
         Aufgabe pro Gruppe muss stehen bleiben.
@@ -98,7 +96,7 @@ export function DuplicateTasksPanel() {
           type="button"
           disabled={busy}
           onClick={() => void scan()}
-          className="rounded-lg border border-[#333333] bg-[#0a0a0a] px-4 py-2 font-mono text-[12px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40"
+          className="ui-btn-secondary tap-scale rounded-md px-4 py-2 font-mono text-[12px] uppercase tracking-wide disabled:opacity-40"
         >
           {busy && !groups ? "Prüfe …" : "Duplikate prüfen"}
         </button>
@@ -107,17 +105,17 @@ export function DuplicateTasksPanel() {
             type="button"
             disabled={busy || !canPurge}
             onClick={() => void purgeMarked()}
-            className="rounded-lg bg-[#e63030] px-4 py-2 font-mono text-[12px] uppercase tracking-wide text-white transition-colors hover:bg-[#c92828] disabled:opacity-40"
+            className="ui-btn-primary tap-scale rounded-md px-4 py-2 font-mono text-[12px] uppercase tracking-wide disabled:opacity-40"
           >
             Markierte löschen
           </button>
         ) : null}
       </div>
       {err ? (
-        <p className="mt-3 font-mono text-[12px] text-[#fca5a5]">{err}</p>
+        <p className="mt-3 font-mono text-[12px] text-accent">{err}</p>
       ) : null}
       {groups === null ? null : groups.length === 0 ? (
-        <p className="mt-4 font-sans text-sm text-neutral-500">
+        <p className="mt-4 font-sans text-sm text-fg-muted">
           Keine Duplikat-Gruppen gefunden.
         </p>
       ) : (
@@ -127,9 +125,9 @@ export function DuplicateTasksPanel() {
             return (
               <li
                 key={`${list.map((t) => t.id).join("-")}`}
-                className="rounded-lg border border-[#333333] bg-[#0a0a0a] p-3"
+                className="rounded-lg border border-border-subtle bg-bg p-3"
               >
-                <p className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">
+                <p className="font-mono text-[10px] uppercase tracking-wide text-fg-subtle">
                   Gruppe {gi + 1} · {list.length} Einträge
                 </p>
                 <ul className="mt-2 space-y-2">
@@ -138,7 +136,7 @@ export function DuplicateTasksPanel() {
                     return (
                       <li
                         key={t.id}
-                        className="flex gap-3 rounded-md border border-[#222222] bg-[#111111] px-2 py-2"
+                        className="flex gap-3 rounded-md border border-border-subtle bg-surface px-2 py-2"
                       >
                         <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2">
                           <input
@@ -148,17 +146,17 @@ export function DuplicateTasksPanel() {
                             onChange={(e) =>
                               toggleDeleteMark(gi, t.id, e.target.checked)
                             }
-                            className="mt-1 h-4 w-4 shrink-0 rounded border-[#404040] bg-[#0a0a0a] text-[#e63030] focus:ring-[#e63030]"
+                            className="mt-1 h-4 w-4 shrink-0 rounded border-border bg-bg text-accent focus:ring-2 focus:ring-accent/30"
                           />
                           <span className="min-w-0">
-                            <span className="block font-sans text-[14px] text-neutral-100">
+                            <span className="block font-sans text-sm text-fg">
                               {t.text}
                             </span>
-                            <span className="mt-0.5 block font-mono text-[10px] text-neutral-500">
+                            <span className="mt-0.5 block font-mono text-[10px] text-fg-muted">
                               {marked ? (
-                                <span className="text-[#fca5a5]">wird gelöscht</span>
+                                <span className="text-accent">wird gelöscht</span>
                               ) : (
-                                <span className="text-[#86efac]">bleibt</span>
+                                <span className="text-green">bleibt</span>
                               )}{" "}
                               · {t.deadline?.trim() || "Kein Datum"} ·{" "}
                               {t.bereiche?.name ?? "—"} ·{" "}

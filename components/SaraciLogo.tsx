@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 type Props = {
-  height: 28 | 32 | 40;
+  height: 26 | 28 | 32 | 40;
   className?: string;
   priority?: boolean;
 };

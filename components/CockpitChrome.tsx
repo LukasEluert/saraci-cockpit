@@ -28,7 +28,7 @@ const NAV_BASE: readonly NavItem[] = [
   { href: "/akquise", label: "Akquise", Icon: IconAkquise, slug: "akquise" },
   { href: "/projekte", label: "Projekte", Icon: IconProjekte, slug: "projekte" },
   { href: "/dashboard", label: "Dashboard", Icon: IconTv, slug: "dashboard" },
-  { href: "/websites", label: "SITES", Icon: IconSites, slug: "sites" },
+  { href: "/websites", label: "Sites", Icon: IconSites, slug: "sites" },
   { href: "/einstellungen", label: "Einst.", Icon: IconEinstellungen, slug: "einstellungen" },
 ];
 
@@ -96,10 +96,10 @@ function CockpitNavLinks({
   const sitesDot =
     sitesIndicator === "none" ? null : (
       <span
-        className="pointer-events-none absolute -right-0.5 -top-0.5 h-[8px] w-[8px] rounded-full border border-[#0a0a0a]"
+        className="pointer-events-none absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full border border-bg"
         style={{
           backgroundColor:
-            sitesIndicator === "down" ? "#e63030" : "#4caf7d",
+            sitesIndicator === "down" ? "var(--accent)" : "var(--green)",
         }}
         aria-hidden
       />
@@ -110,19 +110,20 @@ function CockpitNavLinks({
       <nav className="flex flex-col gap-0.5">
         {items.map(({ href, label, Icon }) => {
           const active = isActive(pathname, href);
-          const showSitesDot = label === "SITES" && sitesIndicator !== "none";
+          const showSitesDot = label === "Sites" && sitesIndicator !== "none";
           return (
             <Link
               key={href}
               href={href}
+              title={label}
               className={[
-                "tap-scale flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-wide transition-colors duration-150",
+                "tap-scale flex h-8 items-center gap-2 rounded-md px-3 font-sans text-[13px] font-medium tracking-tight transition-[background-color,color] duration-150 ease-out",
                 active
-                  ? "bg-[#1a0a0a] text-[#e63030]"
-                  : "text-[#666666] hover:bg-[#1a1a1a] hover:text-neutral-100",
+                  ? "bg-accent-dim text-accent"
+                  : "text-fg-muted hover:bg-surface hover:text-fg",
               ].join(" ")}
             >
-              <span className="relative inline-flex h-5 w-5 shrink-0 items-center justify-center opacity-90">
+              <span className="relative inline-flex h-5 w-5 shrink-0 items-center justify-center text-current">
                 <Icon className="h-5 w-5" />
                 {showSitesDot ? sitesDot : null}
               </span>
@@ -138,21 +139,29 @@ function CockpitNavLinks({
     <nav className="flex w-full max-w-full items-stretch justify-evenly gap-0 px-1">
       {items.map(({ href, label, Icon }) => {
         const active = isActive(pathname, href);
-        const showSitesDot = label === "SITES" && sitesIndicator !== "none";
+        const showSitesDot = label === "Sites" && sitesIndicator !== "none";
         return (
           <Link
             key={href}
             href={href}
+            title={label}
             className={[
-              "tap-scale flex min-h-[44px] min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 font-mono text-[10px] uppercase leading-none tracking-wide transition-colors duration-150 sm:text-[11px]",
-              active ? "text-[#e63030]" : "text-[#666666]",
+              "tap-scale flex min-h-[60px] min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-0.5 px-0.5 py-1 transition-[color,opacity] duration-150 ease-out",
+              active ? "text-accent" : "text-fg-subtle",
             ].join(" ")}
           >
-            <span className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center">
+            <span className="relative inline-flex h-5 w-5 shrink-0 items-center justify-center">
               <Icon className="h-5 w-5" aria-hidden />
               {showSitesDot ? sitesDot : null}
             </span>
-            <span className="max-w-full truncate text-center">{label}</span>
+            <span
+              className={[
+                "max-w-full truncate text-center font-sans text-[10px] font-medium tracking-wide transition-opacity duration-150 ease-out",
+                active ? "opacity-100" : "sr-only",
+              ].join(" ")}
+            >
+              {label}
+            </span>
           </Link>
         );
       })}
@@ -186,25 +195,29 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-full flex-col overflow-x-hidden overflow-y-hidden bg-[#0a0a0a] md:h-auto md:max-h-none md:min-h-[100dvh] md:flex-row md:overflow-y-auto">
-      <aside className="hidden w-[12.5rem] shrink-0 flex-col border-r border-[#222222] bg-[#111111] md:flex">
-        <div className="border-b border-[#222222] px-3 py-4">
-          <SaraciLogo height={40} priority className="max-w-[9rem]" />
-          <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-neutral-500">
-            Cockpit
-          </p>
+    <div className="flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-full flex-col overflow-x-hidden overflow-y-hidden bg-bg md:h-auto md:max-h-none md:min-h-[100dvh] md:flex-row md:overflow-y-auto">
+      <aside className="hidden w-[200px] shrink-0 flex-col border-r border-border-subtle bg-bg-elevated md:flex">
+        <div className="border-b border-border-subtle px-6 pb-5 pt-10">
+          <SaraciLogo height={28} priority className="max-w-[9rem]" />
         </div>
         <div className="px-2 py-3">
           <CockpitNavLinks variant="side" sitesIndicator={sitesIndicator} items={navItems} />
         </div>
       </aside>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain max-md:min-h-0 md:min-h-[100dvh] md:overflow-y-auto">
+      <div className="ui-tab-transition flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain max-md:min-h-0 md:min-h-[100dvh] md:overflow-y-auto">
         {children}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 min-h-[64px] border-t border-[#222222] bg-[#111111] pb-[env(safe-area-inset-bottom,0px)] md:hidden">
-        <div className="flex h-full min-h-[64px] w-full max-w-full items-stretch">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-border-subtle pb-[env(safe-area-inset-bottom,0px)] md:hidden"
+        style={{
+          background: "rgba(8,8,8,0.92)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        }}
+      >
+        <div className="flex h-[60px] w-full max-w-full items-stretch">
           <CockpitNavLinks variant="bottom" sitesIndicator={sitesIndicator} items={navItems} />
         </div>
       </div>

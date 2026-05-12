@@ -147,12 +147,10 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-full rounded-xl border border-[#222222] bg-[#111111] p-3 md:p-4"
+      className="w-full max-w-full rounded-lg border border-border-subtle bg-surface p-3 shadow-[var(--stat-inset)] transition-[border-color,background-color] duration-100 ease-out hover:border-border md:p-4"
     >
       <label className="block max-w-full">
-        <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-          Aufgabe
-        </span>
+        <span className="ui-label-upper">Aufgabe</span>
         <div className="mt-2 flex max-w-full gap-2">
           <textarea
             rows={2}
@@ -160,7 +158,7 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
             onChange={(e) => setText(e.target.value)}
             placeholder="Was steht an?"
             disabled={disabled}
-            className="min-h-[4.5rem] min-w-0 flex-1 resize-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[15px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+            className="ui-textarea min-h-[4.5rem] min-w-0 flex-1 resize-none font-sans text-sm disabled:opacity-50"
           />
           {speechSupported ? (
             <button
@@ -170,10 +168,10 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
               disabled={disabled || speechListening}
               onClick={() => startVoiceInput()}
               className={[
-                "tap-scale flex h-[4.5rem] w-12 shrink-0 flex-col items-center justify-center rounded-lg border text-neutral-400 transition-colors",
+                "tap-scale flex h-[4.5rem] w-12 shrink-0 flex-col items-center justify-center rounded-md border text-fg-muted transition-[border-color,background-color,color] duration-100 ease-out",
                 speechListening
-                  ? "animate-pulse border-[#e63030] bg-[#1a0a0a] text-[#e63030]"
-                  : "border-[#222222] bg-[#0a0a0a] hover:border-[#404040] hover:text-neutral-200",
+                  ? "animate-pulse border-accent/50 bg-accent-dim text-accent"
+                  : "border-border bg-bg hover:border-border hover:bg-surface-hover hover:text-fg",
                 disabled ? "opacity-40" : "",
               ].join(" ")}
             >
@@ -182,7 +180,7 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.75"
+                strokeWidth="1.5"
                 aria-hidden
               >
                 <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z" />
@@ -194,42 +192,36 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
       </label>
 
       <label className="mt-4 block max-w-full">
-        <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-          Kunde (optional)
-        </span>
+        <span className="ui-label-upper">Kunde (optional)</span>
         <input
           type="text"
           value={kunde}
           onChange={(e) => setKunde(e.target.value)}
           placeholder="z. B. Firma"
           disabled={disabled}
-          className="mt-2 w-full max-w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[14px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+          className="ui-input mt-2 w-full max-w-full font-sans disabled:opacity-50"
         />
       </label>
 
       <div className="mt-4 grid w-full max-w-full grid-cols-2 gap-2">
         <label className="block min-w-0 max-w-full">
-          <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-            Bereich
-          </span>
+          <span className="ui-label-upper">Bereich</span>
           <select
             value={bereichId}
             onChange={(e) => setBereichId(e.target.value)}
             disabled={disabled || bereiche.length === 0}
-            className="mt-2 w-full max-w-full min-w-0 appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-2.5 font-sans text-[13px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50 md:px-3 md:text-[14px]"
+            className="ui-select mt-2 w-full max-w-full min-w-0 appearance-none font-sans text-sm disabled:opacity-50"
           >
             {bereichOptions}
           </select>
         </label>
         <label className="block min-w-0 max-w-full">
-          <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-            Deadline
-          </span>
+          <span className="ui-label-upper">Deadline</span>
           <select
             value={deadline}
             onChange={(e) => setDeadline(e.target.value as Deadline)}
             disabled={disabled}
-            className="mt-2 w-full max-w-full min-w-0 appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-2.5 font-sans text-[13px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50 md:px-3 md:text-[14px]"
+            className="ui-select mt-2 w-full max-w-full min-w-0 appearance-none font-sans text-sm disabled:opacity-50"
           >
             {DEADLINES.map((d) => (
               <option key={d} value={d}>
@@ -240,31 +232,27 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
         </label>
       </div>
 
-      <div className="mt-4 max-w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-3">
+      <div className="mt-4 max-w-full rounded-md border border-border-subtle bg-bg px-3 py-3">
         <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
             checked={wiederkehrend}
             onChange={(e) => setWiederkehrend(e.target.checked)}
             disabled={disabled}
-            className="tap-scale h-4 w-4 shrink-0 rounded border-[#404040] bg-[#111111] text-[#e63030] focus:ring-[#e63030]"
+            className="tap-scale h-4 w-4 shrink-0 rounded border-border bg-surface text-accent focus:ring-2 focus:ring-accent/30"
           />
-          <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-400">
-            Wiederkehrend
-          </span>
+          <span className="ui-label-upper text-fg-muted">Wiederkehrend</span>
         </label>
         {wiederkehrend ? (
           <label className="mt-3 block max-w-full">
-            <span className="font-mono text-[10px] uppercase tracking-wide text-neutral-500">
-              Intervall
-            </span>
+            <span className="ui-label-upper">Intervall</span>
             <select
               value={wiederholung}
               onChange={(e) =>
                 setWiederholung(e.target.value as Wiederholung)
               }
               disabled={disabled}
-              className="mt-1.5 w-full max-w-full appearance-none rounded-lg border border-[#222222] bg-[#111111] px-3 py-2 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+              className="ui-select mt-1.5 w-full max-w-full appearance-none font-sans text-sm disabled:opacity-50"
             >
               {WIEDERHOLUNGEN.map((w) => (
                 <option key={w} value={w}>
@@ -280,7 +268,7 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
         <button
           type="submit"
           disabled={disabled || !text.trim() || !bereichId}
-          className="tap-scale w-full rounded-lg bg-[#e63030] px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-white transition-colors hover:bg-[#c92828] disabled:cursor-not-allowed disabled:opacity-40"
+          className="ui-btn-primary tap-scale w-full rounded-md px-4 py-3 font-mono text-[12px] uppercase tracking-wide disabled:cursor-not-allowed disabled:opacity-40"
         >
           Hinzufügen
         </button>

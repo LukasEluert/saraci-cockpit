@@ -17,9 +17,6 @@ import { TASKS_LIST_SELECT } from "@/lib/taskSelect";
 import { parseMonitorsUpTotal } from "@/lib/uptimeMonitors";
 import type { AkquiseLogRow, Task } from "@/lib/types";
 
-const kpiValueFontClass =
-  "font-normal tabular-nums [font-family:ui-monospace,'SF_Mono',SFMono-Regular,Menlo,Monaco,Consolas,monospace] [font-variant-numeric:lining-nums]";
-
 function Kpi({
   value,
   label,
@@ -34,13 +31,11 @@ function Kpi({
         : "—"
       : value;
   return (
-    <div className="flex min-h-0 flex-col justify-center rounded-lg border border-[#222222] bg-[#111111] px-2 py-3 md:px-3 md:py-4">
-      <p
-        className={`text-[clamp(1.25rem,4vmin,2.25rem)] leading-none tracking-tight text-neutral-100 ${kpiValueFontClass}`}
-      >
+    <div className="ui-stat-card flex min-h-0 flex-col justify-center">
+      <p className="ui-dashboard-kpi-value font-mono font-light leading-none tracking-tight text-fg">
         {display}
       </p>
-      <p className="mt-1.5 font-mono text-[9px] uppercase leading-tight tracking-wide text-neutral-500 md:text-[10px]">
+      <p className="ui-dashboard-kpi-label mt-2 font-mono text-[10px] font-medium uppercase leading-tight tracking-[0.06em] text-fg-subtle">
         {label}
       </p>
     </div>
@@ -184,36 +179,34 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="flex w-full min-w-0 max-w-full flex-col overflow-x-hidden bg-[#0a0a0a] text-neutral-100 max-md:min-h-0 md:h-full md:min-h-0 md:flex-1 md:flex-col md:overflow-hidden">
-      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-[#222222] bg-[#111111] px-[max(0.5rem,env(safe-area-inset-left))] py-2 pr-[max(0.5rem,env(safe-area-inset-right))]">
+    <div className="cockpit-dashboard--tv flex w-full min-w-0 max-w-full flex-col overflow-x-hidden bg-bg text-fg max-md:min-h-0 md:h-full md:min-h-0 md:flex-1 md:flex-col md:overflow-hidden">
+      <header className="flex min-h-[52px] shrink-0 items-center justify-between gap-2 border-b border-border-subtle bg-bg-elevated px-[max(0.5rem,env(safe-area-inset-left))] py-2 pr-[max(0.5rem,env(safe-area-inset-right))]">
         <div className="min-w-0">
-          <h1 className="truncate font-sans text-lg font-semibold tracking-tight md:text-xl">
+          <h1 className="truncate font-sans text-lg font-medium tracking-tight md:text-xl">
             Dashboard
           </h1>
-          <p className="truncate font-mono text-[10px] text-neutral-500 md:text-[11px]">
+          <p className="truncate font-mono text-[10px] text-fg-muted md:text-[11px]">
             Tasks · Akquise · Websites
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <p
-            className={`text-sm text-[#e63030] md:text-base ${kpiValueFontClass}`}
-          >
+          <p className="font-mono text-sm font-light tabular-nums tracking-tight text-accent md:text-base">
             {timeStr}
           </p>
-          <p className="max-w-[14rem] truncate font-mono text-[10px] text-neutral-400">
+          <p className="max-w-[14rem] truncate font-mono text-[10px] text-fg-subtle">
             {dateStr}
           </p>
         </div>
       </header>
 
       {err ? (
-        <p className="shrink-0 border-b border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
+        <p className="shrink-0 border-b border-accent/30 bg-accent-dim px-3 py-2 font-mono text-[12px] text-accent">
           {err}
         </p>
       ) : null}
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3 md:p-4">
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+      <div className="ui-dashboard-grid flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-4 md:gap-8 md:p-8">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
           <Kpi
             value={loading ? "—" : row1.offenHeute}
             label="Heute fällig"
@@ -232,7 +225,7 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 md:gap-3">
+        <div className="ui-dashboard-divider grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
           <Kpi
             value={loading ? "—" : row2.akquiseWoche}
             label="Akquisen diese Woche"
@@ -251,41 +244,37 @@ export default function DashboardPage() {
           />
         </div>
 
-        <section className="rounded-xl border border-[#222222] bg-[#111111] p-3 md:p-4">
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-            Heute + Überfällig
-          </h2>
-          <ul className="mt-3 space-y-2">
+        <section className="ui-dashboard-section ui-dashboard-divider rounded-lg border border-border-subtle bg-surface p-4 shadow-[var(--stat-inset)] md:p-5">
+          <h2 className="ui-label-upper text-fg-muted">Heute + Überfällig</h2>
+          <ul className="mt-4 space-y-3">
             {heuteListe.length === 0 ? (
-              <li className="font-sans text-sm text-neutral-500">
-                Keine Einträge.
-              </li>
+              <li className="font-sans text-sm text-fg-muted">Keine Einträge.</li>
             ) : (
               heuteListe.map((t) => (
                 <li
                   key={t.id}
-                  className="flex min-h-0 flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b border-[#222222] pb-2 font-sans text-sm leading-snug text-neutral-300 last:border-0 last:pb-0"
+                  className="flex min-h-0 flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b border-border-subtle pb-3 font-sans text-sm leading-snug text-fg-muted last:border-0 last:pb-0"
                 >
                   <span
                     className={
                       isOpenOverdue(t, clock)
-                        ? "shrink-0 font-mono text-[11px] text-[#e63030]"
-                        : "shrink-0 font-mono text-[11px] text-neutral-500"
+                        ? "shrink-0 font-mono text-[11px] font-light text-accent"
+                        : "shrink-0 font-mono text-[11px] font-light text-fg-subtle"
                     }
                   >
                     {isOpenOverdue(t, clock) ? "überfällig" : "heute"}
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="font-mono text-neutral-500">
+                  <span className="min-w-0 flex-1 text-fg">
+                    <span className="font-mono text-fg-muted">
                       {bereichName(t) || "—"}
                     </span>
                     {t.kunde?.trim() ? (
-                      <span className="font-mono text-neutral-600">
+                      <span className="font-mono text-fg-subtle">
                         {" "}
                         · {t.kunde.trim()}
                       </span>
                     ) : null}
-                    <span className="text-neutral-200"> · {t.text}</span>
+                    <span className="text-fg"> · {t.text}</span>
                   </span>
                 </li>
               ))
@@ -293,23 +282,21 @@ export default function DashboardPage() {
           </ul>
         </section>
 
-        <section className="rounded-xl border border-[#222222] bg-[#111111] p-3 md:p-4">
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-            Letzte Akquisen
-          </h2>
-          <ul className="mt-3 space-y-3">
+        <section className="ui-dashboard-section ui-dashboard-divider rounded-lg border border-border-subtle bg-surface p-4 shadow-[var(--stat-inset)] md:p-5">
+          <h2 className="ui-label-upper text-fg-muted">Letzte Akquisen</h2>
+          <ul className="mt-4 space-y-4">
             {lastAkquise.length === 0 ? (
-              <li className="text-sm text-neutral-500">—</li>
+              <li className="text-sm text-fg-muted">—</li>
             ) : (
               lastAkquise.map((r) => (
                 <li
                   key={r.id}
-                  className="border-b border-[#222222] pb-3 last:border-0 last:pb-0"
+                  className="border-b border-border-subtle pb-4 last:border-0 last:pb-0"
                 >
-                  <p className="font-sans text-sm font-medium text-neutral-200">
+                  <p className="font-sans text-sm font-medium text-fg">
                     {r.firma}
                   </p>
-                  <p className="mt-0.5 font-mono text-[11px] text-neutral-500">
+                  <p className="mt-0.5 font-mono text-[11px] font-light text-fg-muted">
                     {r.kanal} · {r.status}
                   </p>
                 </li>

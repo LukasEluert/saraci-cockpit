@@ -23,10 +23,10 @@ async function fetchAllTasksFromSupabase(): Promise<Task[]> {
 }
 
 const btnClass =
-  "tap-scale rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-neutral-200 hover:border-[#e63030] hover:text-white disabled:opacity-40";
+  "ui-btn-secondary tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide disabled:opacity-40";
 
 const iconBtnClass =
-  "tap-scale flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#333333] bg-[#0a0a0a] text-neutral-300 transition-colors hover:border-[#e63030] hover:text-white disabled:opacity-40";
+  "tap-scale flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-bg text-fg-muted transition-[border-color,background-color,color] duration-100 ease-out hover:border-border hover:bg-surface-hover hover:text-fg disabled:opacity-40";
 
 type Props = {
   disabled?: boolean;
@@ -80,7 +80,7 @@ export function DataExportButtons({
           onClick={() => void run("json")}
           className={iconBtnClass}
         >
-          <span className="font-mono text-[10px] font-semibold leading-none text-[#e63030]">
+          <span className="font-mono text-[10px] font-semibold leading-none text-accent">
             {"{}"}
           </span>
         </button>
@@ -97,7 +97,7 @@ export function DataExportButtons({
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.75"
+            strokeWidth="1.5"
             aria-hidden
           >
             <path d="M14 3v4a1 1 0 0 0 1 1h4M5 21h14a2 2 0 0 0 2-2V8l-5-5H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z" />
@@ -137,7 +137,7 @@ export function DataExportButtons({
         </button>
       </div>
       {localError ? (
-        <p className="max-w-[min(100%,18rem)] text-right font-mono text-[10px] text-[#fca5a5]">
+        <p className="max-w-[min(100%,18rem)] text-right font-mono text-[10px] text-accent">
           {localError}
         </p>
       ) : null}

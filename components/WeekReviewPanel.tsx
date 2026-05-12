@@ -53,44 +53,49 @@ export function WeekReviewPanel({
   const stats = buildWeekReviewStats(tasks, akquise, clock);
 
   return (
-    <div className="flex max-h-[min(90dvh,36rem)] flex-col overflow-hidden rounded-xl border border-[#333333] bg-[#111111]">
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#222222] px-4 py-3">
-        <h2 className="font-mono text-[12px] uppercase tracking-wide text-neutral-200">
-          Wochenrückblick
-        </h2>
+    <div className="ui-modal-panel flex max-h-[min(90dvh,40rem)] flex-col overflow-hidden p-0">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border-subtle px-6 py-5">
+        <div>
+          <h2 className="font-sans text-lg font-medium tracking-tight text-fg">
+            Wochenrückblick
+          </h2>
+          <p className="mt-1 font-mono text-[11px] text-fg-subtle">
+            Diese Kalenderwoche
+          </p>
+        </div>
         {showClose && onClose ? (
           <button
             type="button"
             onClick={onClose}
-            className="tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-neutral-400 hover:bg-[#222222] hover:text-neutral-100"
+            className="tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-fg-muted transition-colors duration-100 ease-out hover:bg-surface-hover hover:text-fg"
             aria-label="Schließen"
           >
             ×
           </button>
         ) : null}
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
         {err ? (
-          <p className="font-mono text-[12px] text-[#fca5a5]">{err}</p>
+          <p className="font-mono text-[12px] text-accent">{err}</p>
         ) : loading ? (
-          <p className="font-mono text-[12px] text-neutral-500">Lade …</p>
+          <p className="font-mono text-[12px] text-fg-muted">Lade …</p>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <StatBox label="Erledigt KW" value={stats.erledigtWoche} />
-              <StatBox label="Offen (jetzt)" value={stats.offenJetzt} />
-              <StatBox label="Akquise KW" value={stats.akquiseWoche} />
-              <StatBox label="Rate %" value={`${stats.ratePercent}%`} />
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <StatBlock label="Erledigt KW" value={stats.erledigtWoche} />
+              <StatBlock label="Offen (jetzt)" value={stats.offenJetzt} />
+              <StatBlock label="Akquise KW" value={stats.akquiseWoche} />
+              <StatBlock label="Rate %" value={`${stats.ratePercent}%`} />
             </div>
-            <p className="mt-4 rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-2 font-sans text-[14px] leading-relaxed text-neutral-300">
+            <p className="mt-8 border-t border-border-subtle pt-6 font-sans text-base italic leading-relaxed text-fg-muted">
               {stats.motivation}
             </p>
-            <h3 className="mt-4 font-mono text-[10px] uppercase tracking-wide text-neutral-500">
+            <h3 className="mt-8 font-mono text-[10px] font-medium uppercase tracking-[0.06em] text-fg-subtle">
               Top 3 erledigt (diese Woche)
             </h3>
-            <ol className="mt-2 list-decimal space-y-1.5 pl-5 font-sans text-[13px] text-neutral-200">
+            <ol className="mt-3 list-decimal space-y-2 pl-5 font-sans text-sm text-fg">
               {stats.top3Erledigt.length === 0 ? (
-                <li className="text-neutral-500">—</li>
+                <li className="text-fg-muted">—</li>
               ) : (
                 stats.top3Erledigt.map((t) => (
                   <li key={t.id} className="break-words">
@@ -106,13 +111,13 @@ export function WeekReviewPanel({
   );
 }
 
-function StatBox({ label, value }: { label: string; value: string | number }) {
+function StatBlock({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-[#222222] bg-[#0a0a0a] px-2 py-2">
-      <p className="font-mono text-[18px] tabular-nums text-neutral-100">
+    <div className="rounded-lg border border-border-subtle bg-surface px-3 py-4 shadow-[var(--stat-inset)]">
+      <p className="font-mono text-[clamp(1.75rem,5vmin,2.75rem)] font-light tabular-nums leading-none text-fg">
         {value}
       </p>
-      <p className="mt-0.5 font-mono text-[9px] uppercase leading-tight text-neutral-500">
+      <p className="mt-2 font-mono text-[10px] font-medium uppercase leading-tight tracking-[0.06em] text-fg-subtle">
         {label}
       </p>
     </div>

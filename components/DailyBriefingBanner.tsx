@@ -50,16 +50,21 @@ export function DailyBriefingBanner({
 
   return (
     <div
-      className="relative mb-3 flex min-w-0 items-stretch overflow-hidden rounded-lg border border-[#333333] bg-[#111111] shadow-md"
+      className="ui-animate-briefing relative mb-3 flex min-w-0 items-stretch overflow-hidden rounded-lg border border-accent/20 pr-10 shadow-[var(--stat-inset)]"
+      style={{
+        background: "rgba(20,20,20,0.8)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
       role="status"
     >
       <div
-        className="w-1 shrink-0 bg-[#e63030]"
+        className="w-[3px] shrink-0 bg-accent"
         aria-hidden
       />
-      <div className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 pr-10">
-        <p className="min-w-0 font-mono text-[11px] leading-snug text-neutral-200 md:text-[12px]">
-          <span className="text-[#e63030]">Heute:</span>{" "}
+      <div className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2.5">
+        <p className="min-w-0 font-mono text-[11px] leading-snug text-fg md:text-[12px]">
+          <span className="text-accent">Heute:</span>{" "}
           {faelligHeute} {faelligHeute === 1 ? "Task" : "Tasks"} fällig ·{" "}
           {ueberfaellig} überfällig · {akquiseTeil}
         </p>
@@ -67,7 +72,7 @@ export function DailyBriefingBanner({
       <button
         type="button"
         onClick={() => consume()}
-        className="tap-scale absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-neutral-400 hover:bg-[#222222] hover:text-neutral-100"
+        className="tap-scale absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-fg-muted transition-colors duration-100 ease-out hover:bg-surface-hover hover:text-fg"
         aria-label="Briefing schließen"
       >
         ×

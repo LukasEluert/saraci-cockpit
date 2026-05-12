@@ -246,8 +246,8 @@ export function TaskItem({
   const leftAccent: import("react").CSSProperties = {
     borderLeftWidth: 3,
     borderLeftColor: farbe,
-    borderTopLeftRadius: "0.5rem",
-    borderBottomLeftRadius: "0.5rem",
+    borderTopLeftRadius: "8px",
+    borderBottomLeftRadius: "8px",
   };
 
   const modalBereichSelectChildren = (
@@ -326,8 +326,8 @@ export function TaskItem({
   }
 
   const cardClass = [
-    "group flex max-w-full gap-2 rounded-lg border border-[#222222] bg-[#111111] py-2 pl-2 pr-2 transition-colors md:gap-3 md:px-3 md:py-3",
-    done ? "opacity-50" : "",
+    "group flex max-w-full gap-2 rounded-lg border border-border-subtle bg-surface py-2.5 pl-3 pr-2 shadow-[var(--stat-inset)] transition-[border-color,background-color,opacity] duration-100 ease-out hover:border-border hover:bg-surface-hover md:gap-3 md:px-3",
+    done ? "opacity-50 transition-opacity duration-300" : "",
   ].join(" ");
 
   const swipeActive = swipeLayout && !disabled && !done;
@@ -382,19 +382,19 @@ export function TaskItem({
         type="button"
         onClick={() => onToggle(task)}
         aria-label={done ? "Als offen markieren" : "Als erledigt markieren"}
-        className="tap-scale flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-lg border border-transparent hover:border-[#404040]"
+        className="tap-scale flex h-10 w-10 shrink-0 items-center justify-center self-start rounded-md border border-transparent hover:border-border"
       >
         <span
           className={[
-            "flex h-5 w-5 items-center justify-center rounded border transition-colors",
+            "flex h-4 w-4 items-center justify-center rounded border transition-[border-color,background-color,color] duration-100 ease-out",
             done
-              ? "border-[#e63030] bg-[#e63030] text-white"
-              : "border-[#404040] bg-transparent hover:border-[#737373]",
+              ? "border-accent bg-accent text-white"
+              : "border-border bg-transparent hover:border-fg-muted",
           ].join(" ")}
         >
           {done ? (
             <svg
-              className="h-3 w-3"
+              className="h-2.5 w-2.5"
               viewBox="0 0 12 12"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -414,26 +414,26 @@ export function TaskItem({
       <div className="min-w-0 flex-1 overflow-hidden">
         <p
           className={[
-            "break-words font-sans text-[15px] leading-snug text-neutral-100",
+            "break-words font-sans text-sm leading-snug text-fg transition-[opacity,text-decoration-color] duration-300 ease-out",
             done ? "line-through" : "",
           ].join(" ")}
         >
           {task.text}
         </p>
         {notizPreview(task.notiz) ? (
-          <p className="mt-1 break-words font-sans text-[12px] leading-snug text-neutral-500">
+          <p className="mt-1 break-words font-sans text-xs leading-snug text-fg-muted">
             {notizPreview(task.notiz)}
           </p>
         ) : null}
-        <div className="mt-2 flex max-w-full flex-wrap items-center gap-2">
+        <div className="mt-2 flex max-w-full flex-wrap items-center gap-1.5">
           {showKunde ? (
-            <span className="inline-flex max-w-full items-center gap-1 rounded border border-[#333333] bg-[#0a0a0a] px-2 py-0.5 font-sans text-[11px] text-neutral-500">
+            <span className="ui-tag max-w-full gap-1 font-sans normal-case tracking-normal">
               <svg
-                className="h-3.5 w-3.5 shrink-0 text-neutral-500"
+                className="h-3 w-3 shrink-0 text-fg-muted"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.75"
+                strokeWidth="1.5"
                 aria-hidden
               >
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -452,7 +452,7 @@ export function TaskItem({
               skipBlurSave.current = false;
               openEditModal();
             }}
-            className="tap-scale inline-flex max-w-full cursor-pointer items-center rounded border px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+            className="tap-scale ui-tag max-w-full cursor-pointer font-mono normal-case tracking-wide transition-opacity duration-100 hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
             style={bereichBadgeStyle(farbe)}
             aria-label="Bereich ändern"
           >
@@ -469,7 +469,7 @@ export function TaskItem({
               openEditModal();
             }}
             className={[
-              "tap-scale inline-flex cursor-pointer items-center rounded border px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40",
+              "tap-scale ui-tag inline-flex cursor-pointer font-mono transition-opacity duration-100 hover:opacity-90 disabled:pointer-events-none disabled:opacity-40",
               deadlineBadgeClass(task.deadline),
             ].join(" ")}
             aria-label="Deadline ändern"
@@ -478,24 +478,24 @@ export function TaskItem({
           </button>
           {showPrioritaet ? (
             <span
-              className="inline-flex items-center rounded border px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide"
+              className="ui-tag inline-flex font-mono"
               style={prioritaetTagStyle(pNum)}
             >
               P{pNum}
             </span>
           ) : null}
           {wieder ? (
-            <span className="inline-flex items-center rounded border border-[#404040] bg-[#0a0a0a] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-neutral-400">
+            <span className="ui-tag inline-flex font-mono text-fg-muted">
               {(task.wiederholung as Wiederholung) ?? ""}
             </span>
           ) : null}
           {showAktualisiert ? (
             <span
-              className="inline-flex items-center rounded border px-2 py-0.5 font-mono text-[11px] tracking-wide"
+              className="ui-tag inline-flex font-mono tracking-wide text-fg-muted"
               style={{
-                borderColor: "var(--muted)",
-                color: "var(--muted)",
-                backgroundColor: "rgba(38,38,38,0.35)",
+                borderColor: "var(--border)",
+                color: "var(--text-tertiary)",
+                backgroundColor: "var(--surface-hover)",
               }}
             >
               {aktualisiertText}
@@ -511,7 +511,7 @@ export function TaskItem({
             rows={3}
             autoFocus
             placeholder="Notiz …"
-            className="mt-3 w-full max-w-full resize-y rounded-lg border border-[#333333] bg-[#0a0a0a] px-3 py-2 font-sans text-[13px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+            className="ui-textarea mt-3 w-full max-w-full resize-y text-sm disabled:opacity-50"
           />
         ) : null}
       </div>
@@ -528,14 +528,14 @@ export function TaskItem({
               openEditModal();
             }}
             aria-label="Aufgabe bearbeiten"
-            className="tap-scale flex h-11 w-11 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030] disabled:opacity-40"
+            className="tap-scale flex h-10 w-10 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent disabled:opacity-40"
           >
             <svg
               className="h-4 w-4"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.8"
+              strokeWidth="1.5"
               aria-hidden
             >
               <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
@@ -551,14 +551,14 @@ export function TaskItem({
               skipBlurSave.current = false;
             }}
             aria-label="Notiz bearbeiten"
-            className="tap-scale flex h-11 w-11 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
+            className="tap-scale flex h-10 w-10 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
           >
             <svg
               className="h-4 w-4"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.8"
+              strokeWidth="1.5"
               aria-hidden
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -575,14 +575,14 @@ export function TaskItem({
                 handleIcsDownload();
               }}
               aria-label="Kalender exportieren"
-              className="tap-scale flex h-11 w-11 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
+              className="tap-scale flex h-10 w-10 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
             >
               <svg
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.8"
+                strokeWidth="1.5"
                 aria-hidden
               >
                 <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -594,7 +594,7 @@ export function TaskItem({
         <button
           type="button"
           onClick={() => onDelete(task)}
-          className="tap-scale flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2 font-mono text-[11px] text-neutral-500 transition-colors hover:bg-[#1a1a1a] hover:text-[#e63030]"
+          className="tap-scale flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md px-2 font-mono text-[11px] text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
         >
           Löschen
         </button>
@@ -606,7 +606,7 @@ export function TaskItem({
     editOpen && typeof document !== "undefined"
       ? createPortal(
             <div
-              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4"
+              className="ui-modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4"
               role="presentation"
               onMouseDown={(e) => {
                 if (e.target === e.currentTarget) cancelEdit();
@@ -616,68 +616,60 @@ export function TaskItem({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={`task-edit-title-${task.id}`}
-                className="flex max-h-[min(90dvh,32rem)] w-[90vw] max-w-md flex-col overflow-hidden rounded-xl border border-[#333333] bg-[#111111] shadow-xl"
+                className="ui-animate-modal ui-modal-panel flex max-h-[min(90dvh,32rem)] w-[90vw] max-w-md flex-col overflow-hidden p-0"
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <div className="border-b border-[#222222] px-4 py-3">
+                <div className="border-b border-border-subtle px-5 py-4">
                   <h2
                     id={`task-edit-title-${task.id}`}
-                    className="font-mono text-[12px] uppercase tracking-wide text-neutral-200"
+                    className="font-sans text-base font-medium tracking-tight text-fg"
                   >
                     Aufgabe bearbeiten
                   </h2>
                 </div>
-                <div className="flex-1 overflow-y-auto px-4 py-4">
+                <div className="flex-1 overflow-y-auto px-5 py-4">
                   <label className="block">
-                    <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-                      Text
-                    </span>
+                    <span className="ui-label-upper">Text</span>
                     <textarea
                       value={textDraft}
                       onChange={(e) => setTextDraft(e.target.value)}
                       disabled={editBusy}
                       rows={3}
                       autoFocus
-                      className="mt-2 w-full resize-y rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[15px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                      className="ui-textarea mt-2 w-full resize-y text-sm disabled:opacity-50"
                     />
                   </label>
                   <label className="mt-4 block">
-                    <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-                      Kunde (optional)
-                    </span>
+                    <span className="ui-label-upper">Kunde (optional)</span>
                     <input
                       type="text"
                       value={kundeDraft}
                       onChange={(e) => setKundeDraft(e.target.value)}
                       disabled={editBusy}
                       placeholder="z. B. Firma"
-                      className="mt-2 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[14px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                      className="ui-input mt-2 w-full font-sans disabled:opacity-50"
                     />
                   </label>
                   <label className="mt-4 block">
-                    <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-                      Bereich
-                    </span>
+                    <span className="ui-label-upper">Bereich</span>
                     <select
                       value={bereichIdDraft}
                       onChange={(e) => setBereichIdDraft(e.target.value)}
                       disabled={editBusy || bereiche.length === 0}
-                      className="mt-2 w-full appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2.5 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                      className="ui-select mt-2 w-full appearance-none font-sans text-sm disabled:opacity-50"
                     >
                       {modalBereichSelectChildren}
                     </select>
                   </label>
                   <label className="mt-4 block">
-                    <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-                      Deadline
-                    </span>
+                    <span className="ui-label-upper">Deadline</span>
                     <select
                       value={deadlineDraft}
                       onChange={(e) =>
                         setDeadlineDraft(e.target.value as Deadline)
                       }
                       disabled={editBusy}
-                      className="mt-2 w-full appearance-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2.5 font-sans text-[14px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                      className="ui-select mt-2 w-full appearance-none font-sans text-sm disabled:opacity-50"
                     >
                       {DEADLINES.map((d) => (
                         <option key={d} value={d}>
@@ -687,12 +679,12 @@ export function TaskItem({
                     </select>
                   </label>
                 </div>
-                <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-[#222222] px-4 py-3">
+                <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-border-subtle px-5 py-4">
                   <button
                     type="button"
                     onClick={cancelEdit}
                     disabled={editBusy}
-                    className="tap-scale rounded-lg border border-[#333333] px-4 py-2 font-mono text-[12px] uppercase tracking-wide text-neutral-300 transition-colors hover:border-neutral-500 disabled:opacity-40"
+                    className="ui-btn-secondary tap-scale rounded-md px-4 py-2 font-mono text-[12px] uppercase tracking-wide disabled:opacity-40"
                   >
                     Abbrechen
                   </button>
@@ -700,7 +692,7 @@ export function TaskItem({
                     type="button"
                     onClick={() => void saveEdit()}
                     disabled={editBusy || !canSaveEdit}
-                    className="tap-scale rounded-lg border border-[#e63030]/60 bg-[#1a0a0a] px-4 py-2 font-mono text-[12px] uppercase tracking-wide text-neutral-100 transition-colors hover:border-[#e63030] hover:bg-[#220808] disabled:opacity-40"
+                    className="ui-btn-primary tap-scale rounded-md px-4 py-2 font-mono text-[12px] uppercase tracking-wide disabled:opacity-40"
                   >
                     {editBusy ? "Speichern …" : "Speichern"}
                   </button>

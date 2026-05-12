@@ -139,19 +139,19 @@ export default function AkquisePage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-[#0a0a0a] px-[max(1rem,env(safe-area-inset-left))] pb-3 max-md:pb-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] md:min-h-[100dvh] md:pb-8">
+    <div className="flex h-full min-h-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-bg px-[max(1rem,env(safe-area-inset-left))] pb-3 max-md:pb-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] md:min-h-[100dvh] md:pb-8">
       <div className="mx-auto w-full min-w-0 max-w-lg space-y-8">
         <header>
-          <h1 className="font-sans text-xl font-medium tracking-tight text-neutral-100">
+          <h1 className="font-sans text-xl font-medium tracking-tight text-fg">
             Akquise-Log
           </h1>
-          <p className="mt-1 font-mono text-[11px] text-neutral-500">
+          <p className="mt-1 font-mono text-[11px] text-fg-muted">
             Kontakte · Status · Kanal
           </p>
         </header>
 
         {err ? (
-          <p className="rounded-lg border border-[#e63030]/40 bg-[#1a0a0a] px-3 py-2 font-mono text-[12px] text-[#fca5a5]">
+          <p className="rounded-lg border border-accent/30 bg-accent-dim px-3 py-2 font-mono text-[12px] text-accent">
             {err}
           </p>
         ) : null}
@@ -164,13 +164,13 @@ export default function AkquisePage() {
 
         <form
           onSubmit={handleAdd}
-          className="space-y-4 overflow-hidden rounded-xl border border-[#222222] bg-[#111111] p-4"
+          className="space-y-4 overflow-hidden rounded-xl border border-border-subtle bg-surface p-4"
         >
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
             Neuer Eintrag
           </h2>
           <label className="block">
-            <span className="font-mono text-[10px] uppercase text-neutral-500">
+            <span className="font-mono text-[10px] uppercase text-fg-muted">
               Firma
             </span>
             <input
@@ -178,12 +178,12 @@ export default function AkquisePage() {
               onChange={(e) => setFirma(e.target.value)}
               required
               disabled={busy}
-              className="mt-1 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+              className="mt-1 w-full rounded-lg border border-border-subtle bg-bg px-3 py-2 font-sans text-sm text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
             />
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
-              <span className="font-mono text-[10px] uppercase text-neutral-500">
+              <span className="font-mono text-[10px] uppercase text-fg-muted">
                 Datum
               </span>
               <input
@@ -191,18 +191,18 @@ export default function AkquisePage() {
                 value={datum}
                 onChange={(e) => setDatum(e.target.value)}
                 disabled={busy}
-                className="mt-1 w-full max-w-full box-border rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                className="mt-1 w-full max-w-full box-border rounded-lg border border-border-subtle bg-bg px-3 py-2 font-sans text-sm text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
               />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] uppercase text-neutral-500">
+              <span className="font-mono text-[10px] uppercase text-fg-muted">
                 Kanal
               </span>
               <select
                 value={kanal}
                 onChange={(e) => setKanal(e.target.value as AkquiseKanal)}
                 disabled={busy}
-                className="mt-1 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                className="mt-1 w-full rounded-lg border border-border-subtle bg-bg px-3 py-2 font-sans text-sm text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
               >
                 {AKQUISE_KANAELE.map((k) => (
                   <option key={k} value={k}>
@@ -213,14 +213,14 @@ export default function AkquisePage() {
             </label>
           </div>
           <label className="block">
-            <span className="font-mono text-[10px] uppercase text-neutral-500">
+            <span className="font-mono text-[10px] uppercase text-fg-muted">
               Status
             </span>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as AkquiseStatus)}
               disabled={busy}
-              className="mt-1 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+              className="mt-1 w-full rounded-lg border border-border-subtle bg-bg px-3 py-2 font-sans text-sm text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
             >
               {AKQUISE_STATUS.map((s) => (
                 <option key={s} value={s}>
@@ -230,7 +230,7 @@ export default function AkquisePage() {
             </select>
           </label>
           <label className="block">
-            <span className="font-mono text-[10px] uppercase text-neutral-500">
+            <span className="font-mono text-[10px] uppercase text-fg-muted">
               Notiz
             </span>
             <textarea
@@ -238,14 +238,14 @@ export default function AkquisePage() {
               value={notiz}
               onChange={(e) => setNotiz(e.target.value)}
               disabled={busy}
-              className="mt-1 w-full resize-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-sm text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+              className="mt-1 w-full resize-none rounded-lg border border-border-subtle bg-bg px-3 py-2 font-sans text-sm text-fg focus:border-accent/50 focus:outline-none disabled:opacity-50"
             />
           </label>
           <div className="flex justify-end">
             <button
               type="submit"
               disabled={busy || !firma.trim()}
-              className="w-full rounded-lg bg-[#e63030] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-white hover:bg-[#c92828] disabled:opacity-40 sm:w-auto"
+              className="w-full ui-btn-primary rounded-md px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-white  disabled:opacity-40 sm:w-auto"
             >
               Speichern
             </button>
@@ -253,38 +253,38 @@ export default function AkquisePage() {
         </form>
 
         <section>
-          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
             Alle Einträge
           </h2>
           {loading ? (
-            <p className="mt-3 font-mono text-[12px] text-neutral-500">
+            <p className="mt-3 font-mono text-[12px] text-fg-muted">
               Lade …
             </p>
           ) : (
             <ul className="mt-3 space-y-2">
               {rows.length === 0 ? (
-                <li className="rounded-lg border border-dashed border-[#333333] px-3 py-6 text-center font-sans text-sm text-neutral-500">
+                <li className="rounded-lg border border-dashed border-border px-3 py-6 text-center font-sans text-sm text-fg-muted">
                   Noch keine Einträge.
                 </li>
               ) : (
                 rows.map((r) => (
                   <li
                     key={r.id}
-                    className="rounded-lg border border-[#222222] bg-[#111111] px-3 py-3"
+                    className="rounded-lg border border-border-subtle bg-surface px-3 py-3"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="font-sans text-[15px] text-neutral-100">
+                        <p className="font-sans text-[15px] text-fg">
                           {r.firma}
                         </p>
-                        <p className="mt-1 font-mono text-[11px] text-neutral-500">
+                        <p className="mt-1 font-mono text-[11px] text-fg-muted">
                           {new Date(r.datum + "T12:00:00").toLocaleDateString(
                             "de-DE"
                           )}{" "}
                           · {r.kanal}
                         </p>
                         {r.notiz?.trim() ? (
-                          <p className="mt-2 font-sans text-[13px] text-neutral-400">
+                          <p className="mt-2 font-sans text-[13px] text-fg-muted">
                             {r.notiz}
                           </p>
                         ) : null}
@@ -295,7 +295,7 @@ export default function AkquisePage() {
                         onChange={(e) =>
                           void updateStatus(r.id, e.target.value as AkquiseStatus)
                         }
-                        className="max-w-full rounded-lg border border-[#333333] bg-[#0a0a0a] px-2 py-1.5 font-mono text-[11px] text-neutral-200 focus:border-[#e63030] focus:outline-none disabled:opacity-40"
+                        className="max-w-full rounded-lg border border-border bg-bg px-2 py-1.5 font-mono text-[11px] text-fg focus:border-accent/50 focus:outline-none disabled:opacity-40"
                       >
                         {AKQUISE_STATUS.map((s) => (
                           <option key={s} value={s}>
@@ -317,11 +317,11 @@ export default function AkquisePage() {
 
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[#222222] bg-[#111111] px-3 py-3">
-      <p className="font-mono text-[10px] uppercase leading-tight tracking-wide text-neutral-500">
+    <div className="rounded-xl border border-border-subtle bg-surface px-3 py-3">
+      <p className="font-mono text-[10px] uppercase leading-tight tracking-wide text-fg-muted">
         {label}
       </p>
-      <p className="mt-1 font-mono text-2xl font-normal tabular-nums leading-tight text-neutral-100">
+      <p className="mt-1 font-mono text-2xl font-normal tabular-nums leading-tight text-fg">
         {value}
       </p>
     </div>

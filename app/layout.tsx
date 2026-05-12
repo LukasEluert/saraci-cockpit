@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#080808",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -52,7 +52,7 @@ export default function RootLayout({
       lang="de"
       className={`${dmSans.variable} ${dmMono.variable} h-full antialiased`}
     >
-      <body className="min-h-[100dvh] min-h-screen bg-[#0a0a0a] font-sans text-neutral-100">
+      <body className="min-h-[100dvh] min-h-screen bg-bg font-sans text-fg antialiased">
         {children}
       </body>
     </html>

@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-const c = "stroke-current stroke-[1.75] [stroke-linecap:round] [stroke-linejoin:round]";
+const c = "stroke-current stroke-[1.5] [stroke-linecap:round] [stroke-linejoin:round]";
 
 export function IconCockpit(props: SVGProps<SVGSVGElement>) {
   return (

@@ -73,13 +73,13 @@ export function bereichBadgeStyle(farbe: string): BereichBadgeStyle {
 export function deadlineBadgeClass(deadline: string): string {
   const d = deadline?.trim() || "Kein Datum";
   if (d === "Heute") {
-    return "bg-[#2a0f0f] text-[#f87171] border-[#e63030]";
+    return "border-accent/25 bg-accent-dim text-accent";
   }
   if (d === "Diese Woche") {
-    return "bg-[#451a03] text-[#fcd34d] border-[#d97706]";
+    return "border-amber/30 bg-amber-dim text-amber";
   }
   if (d === "Diesen Monat") {
-    return "bg-[#262626] text-[#a3a3a3] border-[#525252]";
+    return "border-border text-fg-muted bg-surface-hover/60";
   }
-  return "bg-[#171717] text-[#737373] border-[#333333]";
+  return "border-border-subtle bg-bg text-fg-subtle";
 }
