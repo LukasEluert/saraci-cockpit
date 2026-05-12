@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { DuplicateTasksPanel } from "@/components/DuplicateTasksPanel";
 import { getSupabase } from "@/lib/supabase";
+import {
+  readShowAkquise,
+  readShowProjekte,
+  writeShowAkquise,
+  writeShowProjekte,
+} from "@/lib/navPreferences";
 import { ensureDefaultBereiche } from "@/lib/seedBereiche";
 import type { BereichRow } from "@/lib/types";
 
@@ -10,6 +17,8 @@ export default function EinstellungenPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showAkquise, setShowAkquise] = useState(true);
+  const [showProjekte, setShowProjekte] = useState(true);
 
   const [newName, setNewName] = useState("");
   const [newFarbe, setNewFarbe] = useState("#e63030");
@@ -37,6 +46,11 @@ export default function EinstellungenPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    setShowAkquise(readShowAkquise());
+    setShowProjekte(readShowProjekte());
+  }, []);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -137,6 +151,50 @@ export default function EinstellungenPage() {
             {err}
           </p>
         ) : null}
+
+        <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+            Navigation
+          </h2>
+          <p className="mt-2 font-sans text-[13px] text-neutral-400">
+            Ausgeblendete Bereiche erscheinen nicht in der Sidebar und in der
+            mobilen unteren Navigation.
+          </p>
+          <div className="mt-4 space-y-3">
+            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-3">
+              <span className="font-mono text-[12px] uppercase tracking-wide text-neutral-200">
+                Akquise anzeigen
+              </span>
+              <input
+                type="checkbox"
+                checked={showAkquise}
+                onChange={(e) => {
+                  const v = e.target.checked;
+                  setShowAkquise(v);
+                  writeShowAkquise(v);
+                }}
+                className="h-4 w-4 shrink-0 rounded border-[#404040] bg-[#111111] text-[#e63030] focus:ring-[#e63030]"
+              />
+            </label>
+            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-3">
+              <span className="font-mono text-[12px] uppercase tracking-wide text-neutral-200">
+                Projekte anzeigen
+              </span>
+              <input
+                type="checkbox"
+                checked={showProjekte}
+                onChange={(e) => {
+                  const v = e.target.checked;
+                  setShowProjekte(v);
+                  writeShowProjekte(v);
+                }}
+                className="h-4 w-4 shrink-0 rounded border-[#404040] bg-[#111111] text-[#e63030] focus:ring-[#e63030]"
+              />
+            </label>
+          </div>
+        </section>
+
+        <DuplicateTasksPanel />
 
         <form
           onSubmit={handleAdd}

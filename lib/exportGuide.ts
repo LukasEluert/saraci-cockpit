@@ -85,7 +85,9 @@ export function buildLeitfadenExport(params: { tasks: Task[] }): string {
           t.deadline?.trim() && t.deadline !== "Kein Datum"
             ? ` — Fokus: ${t.deadline}`
             : "";
-        lines.push(`- [ ] ${t.text} [id:${t.id}]${dl}`);
+        const ku = t.kunde?.trim();
+        const kPart = ku ? ` — Kunde: ${ku}` : "";
+        lines.push(`- [ ] ${t.text} [id:${t.id}]${dl}${kPart}`);
       }
       lines.push("");
     }
@@ -99,7 +101,9 @@ export function buildLeitfadenExport(params: { tasks: Task[] }): string {
   } else {
     for (const t of done) {
       const b = bereichLabel(t);
-      lines.push(`- [x] (${b}) ${t.text} [id:${t.id}]`);
+      const ku = t.kunde?.trim();
+      const kPart = ku ? ` — Kunde: ${ku}` : "";
+      lines.push(`- [x] (${b}) ${t.text} [id:${t.id}]${kPart}`);
     }
     lines.push("");
   }

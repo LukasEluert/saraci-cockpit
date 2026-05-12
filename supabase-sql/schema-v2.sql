@@ -41,6 +41,9 @@ ALTER TABLE public.tasks
 ALTER TABLE public.tasks
   ADD COLUMN IF NOT EXISTS prioritaet integer;
 
+ALTER TABLE public.tasks
+  ADD COLUMN IF NOT EXISTS kunde text;
+
 -- Legacy-Spalte bereich (text) → bereich_id (falls vorhanden)
 DO $$
 BEGIN

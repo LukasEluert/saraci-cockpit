@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ComponentType, type SVGProps } from "react";
+import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
 import { SaraciLogo } from "@/components/SaraciLogo";
 import {
   IconAkquise,
@@ -13,19 +13,23 @@ import {
   IconSites,
   IconWoche,
 } from "@/components/NavIcons";
+import { NAV_PREFS_EVENT, readShowAkquise, readShowProjekte } from "@/lib/navPreferences";
 
-const NAV: ReadonlyArray<{
+type NavItem = {
   href: string;
   label: string;
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
-}> = [
-  { href: "/", label: "Cockpit", Icon: IconCockpit },
-  { href: "/woche", label: "Woche", Icon: IconWoche },
-  { href: "/akquise", label: "Akquise", Icon: IconAkquise },
-  { href: "/projekte", label: "Projekte", Icon: IconProjekte },
-  { href: "/dashboard", label: "Dashboard", Icon: IconTv },
-  { href: "/websites", label: "SITES", Icon: IconSites },
-  { href: "/einstellungen", label: "Einst.", Icon: IconEinstellungen },
+  slug: "cockpit" | "woche" | "akquise" | "projekte" | "dashboard" | "sites" | "einstellungen";
+};
+
+const NAV_BASE: readonly NavItem[] = [
+  { href: "/", label: "Cockpit", Icon: IconCockpit, slug: "cockpit" },
+  { href: "/woche", label: "Woche", Icon: IconWoche, slug: "woche" },
+  { href: "/akquise", label: "Akquise", Icon: IconAkquise, slug: "akquise" },
+  { href: "/projekte", label: "Projekte", Icon: IconProjekte, slug: "projekte" },
+  { href: "/dashboard", label: "Dashboard", Icon: IconTv, slug: "dashboard" },
+  { href: "/websites", label: "SITES", Icon: IconSites, slug: "sites" },
+  { href: "/einstellungen", label: "Einst.", Icon: IconEinstellungen, slug: "einstellungen" },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -49,12 +53,43 @@ function deriveSitesIndicator(data: unknown): SitesIndicator {
   return "none";
 }
 
+function useNavItems(): NavItem[] {
+  const [akquise, setAkquise] = useState(true);
+  const [projekte, setProjekte] = useState(true);
+
+  useEffect(() => {
+    function read() {
+      setAkquise(readShowAkquise());
+      setProjekte(readShowProjekte());
+    }
+    read();
+    window.addEventListener("storage", read);
+    window.addEventListener(NAV_PREFS_EVENT, read);
+    return () => {
+      window.removeEventListener("storage", read);
+      window.removeEventListener(NAV_PREFS_EVENT, read);
+    };
+  }, []);
+
+  return useMemo(
+    () =>
+      NAV_BASE.filter((item) => {
+        if (item.slug === "akquise" && !akquise) return false;
+        if (item.slug === "projekte" && !projekte) return false;
+        return true;
+      }),
+    [akquise, projekte]
+  );
+}
+
 function CockpitNavLinks({
   variant,
   sitesIndicator,
+  items,
 }: {
   variant: "side" | "bottom";
   sitesIndicator: SitesIndicator;
+  items: NavItem[];
 }) {
   const pathname = usePathname();
 
@@ -73,7 +108,7 @@ function CockpitNavLinks({
   if (variant === "side") {
     return (
       <nav className="flex flex-col gap-0.5">
-        {NAV.map(({ href, label, Icon }) => {
+        {items.map(({ href, label, Icon }) => {
           const active = isActive(pathname, href);
           const showSitesDot = label === "SITES" && sitesIndicator !== "none";
           return (
@@ -101,7 +136,7 @@ function CockpitNavLinks({
 
   return (
     <nav className="flex w-full max-w-full items-stretch justify-evenly gap-0 px-1">
-      {NAV.map(({ href, label, Icon }) => {
+      {items.map(({ href, label, Icon }) => {
         const active = isActive(pathname, href);
         const showSitesDot = label === "SITES" && sitesIndicator !== "none";
         return (
@@ -127,6 +162,7 @@ function CockpitNavLinks({
 
 export function CockpitChrome({ children }: { children: React.ReactNode }) {
   const [sitesIndicator, setSitesIndicator] = useState<SitesIndicator>("none");
+  const navItems = useNavItems();
 
   useEffect(() => {
     let cancelled = false;
@@ -159,7 +195,7 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
           </p>
         </div>
         <div className="px-2 py-3">
-          <CockpitNavLinks variant="side" sitesIndicator={sitesIndicator} />
+          <CockpitNavLinks variant="side" sitesIndicator={sitesIndicator} items={navItems} />
         </div>
       </aside>
 
@@ -169,7 +205,7 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
 
       <div className="fixed bottom-0 left-0 right-0 z-40 min-h-[64px] border-t border-[#222222] bg-[#111111] pb-[env(safe-area-inset-bottom,0px)] md:hidden">
         <div className="flex h-full min-h-[64px] w-full max-w-full items-stretch">
-          <CockpitNavLinks variant="bottom" sitesIndicator={sitesIndicator} />
+          <CockpitNavLinks variant="bottom" sitesIndicator={sitesIndicator} items={navItems} />
         </div>
       </div>
     </div>

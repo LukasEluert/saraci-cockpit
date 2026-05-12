@@ -114,11 +114,16 @@ export function TaskItem({
   const [deadlineDraft, setDeadlineDraft] = useState<Deadline>(
     normalizeDeadline(task.deadline)
   );
+  const [kundeDraft, setKundeDraft] = useState(task.kunde ?? "");
   const [editBusy, setEditBusy] = useState(false);
 
   useEffect(() => {
     setNotizDraft(task.notiz ?? "");
   }, [task.id, task.notiz]);
+
+  useEffect(() => {
+    setKundeDraft(task.kunde ?? "");
+  }, [task.id, task.kunde]);
 
   useEffect(() => {
     if (!editOpen) return;
@@ -167,6 +172,7 @@ export function TaskItem({
     setTextDraft(task.text);
     setBereichIdDraft(task.bereich_id);
     setDeadlineDraft(normalizeDeadline(task.deadline));
+    setKundeDraft(task.kunde ?? "");
     setEditOpen(true);
   }
 
@@ -181,12 +187,14 @@ export function TaskItem({
     try {
       const sb = getSupabase();
       const now = new Date().toISOString();
+      const kundeVal = kundeDraft.trim() || null;
       const { error } = await sb
         .from("tasks")
         .update({
           text: trimmed,
           bereich_id: bereichIdDraft,
           deadline: deadlineDraft,
+          kunde: kundeVal,
           updated_at: now,
         })
         .eq("id", task.id);
@@ -196,6 +204,7 @@ export function TaskItem({
         text: trimmed,
         bereich_id: bereichIdDraft,
         deadline: deadlineDraft,
+        kunde: kundeVal,
         updated_at: now,
       };
       onTaskUpdated(taskWithBereichJoin(base, bereiche));
@@ -204,6 +213,7 @@ export function TaskItem({
       setTextDraft(task.text);
       setBereichIdDraft(task.bereich_id);
       setDeadlineDraft(normalizeDeadline(task.deadline));
+      setKundeDraft(task.kunde ?? "");
     } finally {
       setEditBusy(false);
     }
@@ -230,6 +240,8 @@ export function TaskItem({
   const aktualisiertText =
     taskWurdeGeaendert(task) ? formatKurzAktualisiert(task.updated_at) : "";
   const showAktualisiert = aktualisiertText.length > 0;
+
+  const showKunde = Boolean(task.kunde?.trim());
 
   const leftAccent: import("react").CSSProperties = {
     borderLeftWidth: 3,
@@ -320,6 +332,22 @@ export function TaskItem({
           </p>
         ) : null}
         <div className="mt-2 flex max-w-full flex-wrap items-center gap-2">
+          {showKunde ? (
+            <span className="inline-flex max-w-full items-center gap-1 rounded border border-[#333333] bg-[#0a0a0a] px-2 py-0.5 font-sans text-[11px] text-neutral-500">
+              <svg
+                className="h-3.5 w-3.5 shrink-0 text-neutral-500"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                aria-hidden
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span className="truncate">{(task.kunde ?? "").trim()}</span>
+            </span>
+          ) : null}
           <button
             type="button"
             disabled={disabled}
@@ -514,6 +542,19 @@ export function TaskItem({
                       rows={3}
                       autoFocus
                       className="mt-2 w-full resize-y rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[15px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+                    />
+                  </label>
+                  <label className="mt-4 block">
+                    <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+                      Kunde (optional)
+                    </span>
+                    <input
+                      type="text"
+                      value={kundeDraft}
+                      onChange={(e) => setKundeDraft(e.target.value)}
+                      disabled={editBusy}
+                      placeholder="z. B. Firma"
+                      className="mt-2 w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[14px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
                     />
                   </label>
                   <label className="mt-4 block">

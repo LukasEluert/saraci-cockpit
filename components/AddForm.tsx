@@ -12,6 +12,7 @@ export type AddTaskPayload = {
   text: string;
   bereich_id: string;
   deadline: Deadline;
+  kunde: string | null;
   wiederkehrend: boolean;
   wiederholung: Wiederholung | null;
 };
@@ -26,6 +27,7 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
   const [text, setText] = useState("");
   const [bereichId, setBereichId] = useState("");
   const [deadline, setDeadline] = useState<Deadline>("Kein Datum");
+  const [kunde, setKunde] = useState("");
   const [wiederkehrend, setWiederkehrend] = useState(false);
   const [wiederholung, setWiederholung] = useState<Wiederholung>("wöchentlich");
 
@@ -50,10 +52,12 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
       text: t,
       bereich_id: bereichId,
       deadline,
+      kunde: kunde.trim() || null,
       wiederkehrend,
       wiederholung: wiederkehrend ? wiederholung : null,
     });
     setText("");
+    setKunde("");
     setWiederkehrend(false);
     setWiederholung("wöchentlich");
   }
@@ -85,6 +89,20 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
           placeholder="Was steht an?"
           disabled={disabled}
           className="mt-2 w-full max-w-full resize-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[15px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+        />
+      </label>
+
+      <label className="mt-4 block max-w-full">
+        <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+          Kunde (optional)
+        </span>
+        <input
+          type="text"
+          value={kunde}
+          onChange={(e) => setKunde(e.target.value)}
+          placeholder="z. B. Firma"
+          disabled={disabled}
+          className="mt-2 w-full max-w-full rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[14px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
         />
       </label>
 

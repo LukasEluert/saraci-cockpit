@@ -25,6 +25,8 @@ export interface Task {
   created_at: string;
   updated_at: string;
   bereiche?: TaskBereichJoin | null;
+  /** Optionaler Kundenname */
+  kunde?: string | null;
 }
 
 export type Wiederholung = "täglich" | "wöchentlich" | "monatlich";

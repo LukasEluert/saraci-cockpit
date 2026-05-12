@@ -104,6 +104,7 @@ export default function Home() {
   const [kiImportOpen, setKiImportOpen] = useState(false);
   const [kiImportNotice, setKiImportNotice] = useState<string | null>(null);
   const [openListFilter, setOpenListFilter] = useState<"all" | "heute">("all");
+  const [kundeFilter, setKundeFilter] = useState("");
 
   useEffect(() => {
     const id = window.setInterval(() => setDateTick((n) => n + 1), 60_000);
@@ -168,18 +169,33 @@ export default function Home() {
     });
   }, [bootstrap]);
 
+  const kundeOptions = useMemo(() => {
+    const s = new Set<string>();
+    for (const t of tasks) {
+      const k = t.kunde?.trim();
+      if (k) s.add(k);
+    }
+    return [...s].sort((a, b) => a.localeCompare(b, "de"));
+  }, [tasks]);
+
   const sortedOpenTasks = useMemo(
     () => sortOpenTasks(tasks.filter((t) => !t.done)),
     [tasks]
   );
+  const openByKunde = useMemo(() => {
+    if (!kundeFilter) return sortedOpenTasks;
+    return sortedOpenTasks.filter(
+      (t) => (t.kunde?.trim() || "") === kundeFilter
+    );
+  }, [sortedOpenTasks, kundeFilter]);
   const openTasks = useMemo(() => {
     if (openListFilter === "heute") {
-      return sortedOpenTasks.filter(
+      return openByKunde.filter(
         (t) => (t.deadline?.trim() || "") === "Heute"
       );
     }
-    return sortedOpenTasks;
-  }, [sortedOpenTasks, openListFilter]);
+    return openByKunde;
+  }, [openByKunde, openListFilter]);
   const doneTasks = useMemo(
     () =>
       tasks
@@ -213,6 +229,7 @@ export default function Home() {
         bereich_id: payload.bereich_id,
         deadline: payload.deadline,
         prioritaet: null,
+        kunde: payload.kunde,
         done: false,
         notiz: null,
         wiederkehrend: payload.wiederkehrend,
@@ -251,6 +268,7 @@ export default function Home() {
           bereich_id: task.bereich_id,
           deadline: task.deadline,
           prioritaet: task.prioritaet ?? null,
+          kunde: task.kunde?.trim() || null,
           done: false,
           notiz: null,
           wiederkehrend: true,
@@ -486,49 +504,74 @@ export default function Home() {
 
           <div className="flex min-w-0 flex-col overflow-x-hidden max-md:pb-2">
             <section className="min-w-0 shrink-0">
-              <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
                   Offen
                 </h2>
-                <div
-                  className="flex shrink-0 rounded-lg border border-[#333333] bg-[#0a0a0a] p-0.5"
-                  role="group"
-                  aria-label="Liste filtern"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenListFilter("all")}
-                    aria-pressed={openListFilter === "all"}
-                    className={[
-                      "tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
-                      openListFilter === "all"
-                        ? "bg-[#222222] text-neutral-100"
-                        : "text-neutral-500 hover:text-neutral-300",
-                    ].join(" ")}
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <label className="flex min-w-0 max-w-full items-center gap-2">
+                    <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-neutral-500">
+                      Kunde
+                    </span>
+                    <select
+                      value={kundeFilter}
+                      onChange={(e) => setKundeFilter(e.target.value)}
+                      disabled={busy}
+                      className="max-w-[12rem] min-w-0 flex-1 appearance-none rounded-lg border border-[#333333] bg-[#0a0a0a] px-2 py-1.5 font-sans text-[12px] text-neutral-100 focus:border-[#e63030] focus:outline-none disabled:opacity-40 sm:max-w-[14rem]"
+                      aria-label="Nach Kunde filtern"
+                    >
+                      <option value="">Alle Kunden</option>
+                      {kundeOptions.map((k) => (
+                        <option key={k} value={k}>
+                          {k}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div
+                    className="flex shrink-0 rounded-lg border border-[#333333] bg-[#0a0a0a] p-0.5"
+                    role="group"
+                    aria-label="Liste filtern"
                   >
-                    Alle
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setOpenListFilter("heute")}
-                    aria-pressed={openListFilter === "heute"}
-                    className={[
-                      "tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
-                      openListFilter === "heute"
-                        ? "bg-[#222222] text-[#f87171]"
-                        : "text-neutral-500 hover:text-neutral-300",
-                    ].join(" ")}
-                  >
-                    Heute
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setOpenListFilter("all")}
+                      aria-pressed={openListFilter === "all"}
+                      className={[
+                        "tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
+                        openListFilter === "all"
+                          ? "bg-[#222222] text-neutral-100"
+                          : "text-neutral-500 hover:text-neutral-300",
+                      ].join(" ")}
+                    >
+                      Alle
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOpenListFilter("heute")}
+                      aria-pressed={openListFilter === "heute"}
+                      className={[
+                        "tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
+                        openListFilter === "heute"
+                          ? "bg-[#222222] text-[#f87171]"
+                          : "text-neutral-500 hover:text-neutral-300",
+                      ].join(" ")}
+                    >
+                      Heute
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="mt-3 flex min-w-0 flex-col gap-2">
                 {openTasks.length === 0 ? (
                   <p className="rounded-lg border border-dashed border-[#333333] px-3 py-6 text-center font-sans text-sm text-neutral-500">
-                    {openListFilter === "heute" && sortedOpenTasks.length > 0
+                    {openListFilter === "heute" && openByKunde.length > 0
                       ? "Keine offenen Tasks mit Deadline „Heute“."
-                      : "Nichts Offenes — gute Arbeit."}
+                      : kundeFilter &&
+                          sortedOpenTasks.length > 0 &&
+                          openByKunde.length === 0
+                        ? `Keine offenen Tasks für „${kundeFilter}“.`
+                        : "Nichts Offenes — gute Arbeit."}
                   </p>
                 ) : (
                   openTasks.map((t) => (
