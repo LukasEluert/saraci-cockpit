@@ -276,14 +276,108 @@ export function TaskItem({
     (bereiche.some((b) => b.id === bereichIdDraft) ||
       bereichIdDraft === task.bereich_id);
 
-  return (
-    <div
-      className={[
-        "group flex max-w-full gap-2 rounded-lg border border-[#222222] bg-[#111111] py-2 pl-2 pr-2 transition-colors md:gap-3 md:px-3 md:py-3",
-        done ? "opacity-50" : "",
-      ].join(" ")}
-      style={leftAccent}
-    >
+  const [swipeLayout, setSwipeLayout] = useState(false);
+  const [swipeX, setSwipeX] = useState(0);
+  const [swipeAnimating, setSwipeAnimating] = useState(false);
+  const [deleteFlash, setDeleteFlash] = useState(false);
+  const swipeWrapRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const swipeDxRef = useRef(0);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () => setSwipeLayout(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  const SWIPE_COMMIT = 80;
+
+  function resetSwipePosition() {
+    setSwipeAnimating(true);
+    setSwipeX(0);
+    swipeDxRef.current = 0;
+    window.setTimeout(() => setSwipeAnimating(false), 220);
+  }
+
+  function runSwipeComplete() {
+    const w = swipeWrapRef.current?.offsetWidth ?? 320;
+    setSwipeAnimating(true);
+    setSwipeX(w);
+    window.setTimeout(() => {
+      onToggle(task);
+      setSwipeX(0);
+      setSwipeAnimating(false);
+    }, 200);
+  }
+
+  function runSwipeDelete() {
+    const w = swipeWrapRef.current?.offsetWidth ?? 320;
+    setDeleteFlash(true);
+    setSwipeAnimating(true);
+    setSwipeX(-w);
+    window.setTimeout(() => {
+      onDelete(task);
+      setSwipeX(0);
+      setSwipeAnimating(false);
+      setDeleteFlash(false);
+    }, 200);
+  }
+
+  const cardClass = [
+    "group flex max-w-full gap-2 rounded-lg border border-[#222222] bg-[#111111] py-2 pl-2 pr-2 transition-colors md:gap-3 md:px-3 md:py-3",
+    done ? "opacity-50" : "",
+  ].join(" ");
+
+  const swipeActive = swipeLayout && !disabled && !done;
+  const progressRight = swipeActive ? Math.min(1, Math.max(0, swipeX / SWIPE_COMMIT)) : 0;
+  const progressLeft = swipeActive ? Math.min(1, Math.max(0, -swipeX / SWIPE_COMMIT)) : 0;
+
+  const cardTransformStyle: import("react").CSSProperties = swipeActive
+    ? {
+        ...leftAccent,
+        transform: `translateX(${swipeX}px)`,
+        transition: swipeAnimating ? "transform 0.2s ease-out" : "none",
+        touchAction: "pan-y",
+      }
+    : leftAccent;
+
+  function onSwipeTouchStart(e: React.TouchEvent) {
+    if (!swipeActive) return;
+    const t = e.changedTouches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+    swipeDxRef.current = 0;
+  }
+
+  function onSwipeTouchMove(e: React.TouchEvent) {
+    if (!swipeActive || !touchStartRef.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartRef.current.x;
+    const dy = t.clientY - touchStartRef.current.y;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      swipeDxRef.current = dx;
+      setSwipeX(dx);
+    }
+  }
+
+  function onSwipeTouchEnd() {
+    if (!swipeActive) return;
+    touchStartRef.current = null;
+    const dx = swipeDxRef.current;
+    if (dx >= SWIPE_COMMIT) {
+      runSwipeComplete();
+      return;
+    }
+    if (dx <= -SWIPE_COMMIT) {
+      runSwipeDelete();
+      return;
+    }
+    resetSwipePosition();
+  }
+
+  const innerCard = (
+    <>
       <button
         type="button"
         onClick={() => onToggle(task)}
@@ -505,9 +599,12 @@ export function TaskItem({
           Löschen
         </button>
       </div>
+    </>
+  );
 
-      {editOpen && typeof document !== "undefined"
-        ? createPortal(
+  const editModal =
+    editOpen && typeof document !== "undefined"
+      ? createPortal(
             <div
               className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4"
               role="presentation"
@@ -612,7 +709,57 @@ export function TaskItem({
             </div>,
             document.body
           )
-        : null}
-    </div>
+      : null;
+
+  return (
+    <>
+      {swipeActive ? (
+        <div
+          ref={swipeWrapRef}
+          className="relative max-w-full overflow-hidden rounded-lg"
+          style={{ touchAction: "pan-y" }}
+          onTouchStart={onSwipeTouchStart}
+          onTouchMove={onSwipeTouchMove}
+          onTouchEnd={onSwipeTouchEnd}
+          onTouchCancel={onSwipeTouchEnd}
+        >
+          <div
+            className="pointer-events-none absolute inset-0 z-0 flex"
+            aria-hidden
+          >
+            <div
+              className="flex flex-1 items-center justify-start bg-[#166534] pl-3 text-lg text-white md:pl-4 md:text-xl"
+              style={{ opacity: progressRight }}
+            >
+              ✓
+            </div>
+            <div
+              className="flex flex-1 items-center justify-end bg-[#991b1b] pr-3 text-lg text-white md:pr-4 md:text-xl"
+              style={{ opacity: progressLeft }}
+            >
+              ×
+            </div>
+          </div>
+          <div className="relative z-10">
+            <div className={cardClass} style={cardTransformStyle}>
+              {innerCard}
+            </div>
+          </div>
+          {deleteFlash ? (
+            <div
+              className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/50 font-mono text-[11px] uppercase tracking-wide text-white"
+              role="status"
+            >
+              Löschen …
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <div className={cardClass} style={leftAccent}>
+          {innerCard}
+        </div>
+      )}
+      {editModal}
+    </>
   );
 }

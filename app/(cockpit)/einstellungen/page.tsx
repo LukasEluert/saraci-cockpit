@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DuplicateTasksPanel } from "@/components/DuplicateTasksPanel";
 import { getSupabase } from "@/lib/supabase";
@@ -192,6 +193,22 @@ export default function EinstellungenPage() {
               />
             </label>
           </div>
+        </section>
+
+        <section className="rounded-xl border border-[#222222] bg-[#111111] p-4">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
+            Wochenrückblick
+          </h2>
+          <p className="mt-2 font-sans text-[13px] text-neutral-400">
+            Auswertung der aktuellen Kalenderwoche: erledigte und offene Tasks,
+            Akquise und Motivation.
+          </p>
+          <Link
+            href="/wochenrueckblick"
+            className="mt-4 inline-flex rounded-lg border border-[#333333] px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-neutral-200 transition-colors hover:border-[#e63030] hover:text-white"
+          >
+            Wochenrückblick anzeigen
+          </Link>
         </section>
 
         <DuplicateTasksPanel />

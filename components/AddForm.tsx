@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DEADLINES,
   WIEDERHOLUNGEN,
   type Deadline,
 } from "@/lib/constants";
+import { parseVoiceTaskText } from "@/lib/speechTaskParse";
+import {
+  getSpeechRecognitionCtor,
+  type SpeechRecognitionLike,
+} from "@/lib/speechRecognition";
 import type { BereichRow, Wiederholung } from "@/lib/types";
 
 export type AddTaskPayload = {
@@ -30,6 +35,24 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
   const [kunde, setKunde] = useState("");
   const [wiederkehrend, setWiederkehrend] = useState(false);
   const [wiederholung, setWiederholung] = useState<Wiederholung>("wöchentlich");
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const [speechListening, setSpeechListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+
+  useEffect(() => {
+    setSpeechSupported(getSpeechRecognitionCtor() !== null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      try {
+        recognitionRef.current?.abort();
+      } catch {
+        /* ignore */
+      }
+      recognitionRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (!bereichId && bereiche.length > 0) {
@@ -73,6 +96,54 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
       ))
     );
 
+  function startVoiceInput() {
+    if (disabled) return;
+    const Ctor = getSpeechRecognitionCtor();
+    if (!Ctor) return;
+    try {
+      recognitionRef.current?.abort();
+    } catch {
+      /* ignore */
+    }
+    const rec = new Ctor();
+    rec.lang = "de-DE";
+    rec.interimResults = false;
+    rec.continuous = false;
+    rec.onresult = (ev) => {
+      const raw = Array.from(ev.results)
+        .map((r) => r[0]?.transcript ?? "")
+        .join(" ")
+        .trim();
+      if (!raw) return;
+      const parsed = parseVoiceTaskText(raw, bereiche);
+      setText((prev) => {
+        const base = prev.trim();
+        const add = parsed.text;
+        if (!base) return add;
+        if (!add) return base;
+        return `${base} ${add}`.trim();
+      });
+      if (parsed.deadline) setDeadline(parsed.deadline);
+      if (parsed.bereichId) setBereichId(parsed.bereichId);
+    };
+    rec.onerror = () => {
+      setSpeechListening(false);
+      recognitionRef.current = null;
+    };
+    rec.onend = () => {
+      setSpeechListening(false);
+      recognitionRef.current = null;
+    };
+    recognitionRef.current = rec;
+    setSpeechListening(true);
+    try {
+      rec.start();
+    } catch {
+      setSpeechListening(false);
+      recognitionRef.current = null;
+    }
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -82,14 +153,44 @@ export function AddForm({ bereiche, disabled, onAdd }: Props) {
         <span className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
           Aufgabe
         </span>
-        <textarea
-          rows={2}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Was steht an?"
-          disabled={disabled}
-          className="mt-2 w-full max-w-full resize-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[15px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
-        />
+        <div className="mt-2 flex max-w-full gap-2">
+          <textarea
+            rows={2}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Was steht an?"
+            disabled={disabled}
+            className="min-h-[4.5rem] min-w-0 flex-1 resize-none rounded-lg border border-[#222222] bg-[#0a0a0a] px-3 py-2 font-sans text-[15px] text-neutral-100 placeholder:text-neutral-600 focus:border-[#e63030] focus:outline-none disabled:opacity-50"
+          />
+          {speechSupported ? (
+            <button
+              type="button"
+              title="Spracheingabe"
+              aria-label="Spracheingabe starten"
+              disabled={disabled || speechListening}
+              onClick={() => startVoiceInput()}
+              className={[
+                "tap-scale flex h-[4.5rem] w-12 shrink-0 flex-col items-center justify-center rounded-lg border text-neutral-400 transition-colors",
+                speechListening
+                  ? "animate-pulse border-[#e63030] bg-[#1a0a0a] text-[#e63030]"
+                  : "border-[#222222] bg-[#0a0a0a] hover:border-[#404040] hover:text-neutral-200",
+                disabled ? "opacity-40" : "",
+              ].join(" ")}
+            >
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                aria-hidden
+              >
+                <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z" />
+                <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v3M8 21h8" />
+              </svg>
+            </button>
+          ) : null}
+        </div>
       </label>
 
       <label className="mt-4 block max-w-full">

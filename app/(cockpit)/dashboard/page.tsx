@@ -216,11 +216,11 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
           <Kpi
             value={loading ? "—" : row1.offenHeute}
-            label="Offene Tasks heute"
+            label="Heute fällig"
           />
           <Kpi
             value={loading ? "—" : row1.offenWoche}
-            label="Offene Tasks diese Woche"
+            label="Diese Woche"
           />
           <Kpi
             value={loading ? "—" : row1.erledigtHeute}
@@ -228,7 +228,7 @@ export default function DashboardPage() {
           />
           <Kpi
             value={loading ? "—" : `${row1.rate}%`}
-            label="Erledigungsrate Woche"
+            label="Rate %"
           />
         </div>
 
@@ -253,7 +253,7 @@ export default function DashboardPage() {
 
         <section className="rounded-xl border border-[#222222] bg-[#111111] p-3 md:p-4">
           <h2 className="font-mono text-[11px] uppercase tracking-wide text-neutral-500">
-            Offene Tasks (Heute + überfällig)
+            Heute + Überfällig
           </h2>
           <ul className="mt-3 space-y-2">
             {heuteListe.length === 0 ? (

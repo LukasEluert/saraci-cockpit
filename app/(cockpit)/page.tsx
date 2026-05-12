@@ -1,19 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AddForm, type AddTaskPayload } from "@/components/AddForm";
+import { DailyBriefingBanner } from "@/components/DailyBriefingBanner";
 import { DataExportButtons } from "@/components/DataExportButtons";
 import { KiImportModal } from "@/components/KiImportModal";
 import { LogoutButton } from "@/components/LogoutButton";
 import { SaraciLogo } from "@/components/SaraciLogo";
 import { TaskItem } from "@/components/TaskItem";
+import { WeekReviewModal } from "@/components/WeekReviewModal";
 import { DEADLINE_ORDER } from "@/lib/constants";
+import { isOpenDueToday, isOpenOverdue } from "@/lib/dashboardMetrics";
+import { wasDailyBriefingShownToday } from "@/lib/briefingStorage";
 import { parseKiTaskImportJson } from "@/lib/kiTaskImport";
 import { buildLeitfadenExport } from "@/lib/exportGuide";
 import { getSupabase } from "@/lib/supabase";
 import { computeNextFälligkeit, todayYmd } from "@/lib/recurrence";
 import { ensureDefaultBereiche } from "@/lib/seedBereiche";
 import { TASKS_LIST_SELECT } from "@/lib/taskSelect";
+import {
+  isoWeekKey,
+  isFridayLocal,
+  markWeekReviewShownForKey,
+  wasWeekReviewShownForKey,
+} from "@/lib/weekReviewStorage";
 import type { BereichRow, Task, Wiederholung } from "@/lib/types";
 
 type SyncState = "ok" | "syncing" | "error";
@@ -29,6 +39,15 @@ function formatDatumMobileHeader(d: Date): string {
   let wd = v("weekday");
   if (wd && !wd.endsWith(".")) wd = `${wd}.`;
   return `${wd} ${v("day")}.${v("month")}`;
+}
+
+function calendarDaysSinceIsoLocalMidnight(iso: string): number {
+  const p = new Date(iso);
+  if (Number.isNaN(p.getTime())) return 0;
+  const start = new Date(p.getFullYear(), p.getMonth(), p.getDate());
+  const now = new Date();
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((end.getTime() - start.getTime()) / 86_400_000);
 }
 
 function prioritySortKey(p: number | null | undefined): number {
@@ -105,6 +124,16 @@ export default function Home() {
   const [kiImportNotice, setKiImportNotice] = useState<string | null>(null);
   const [openListFilter, setOpenListFilter] = useState<"all" | "heute">("all");
   const [kundeFilter, setKundeFilter] = useState("");
+  const [showDailyBriefing, setShowDailyBriefing] = useState(false);
+  const [briefingFaellig, setBriefingFaellig] = useState(0);
+  const [briefingUeber, setBriefingUeber] = useState(0);
+  const [briefingAkquiseTage, setBriefingAkquiseTage] = useState<number | null>(
+    null
+  );
+  const [briefingAkquiseNie, setBriefingAkquiseNie] = useState(false);
+  const briefingAkquiseFetched = useRef(false);
+  const [weekReviewOpen, setWeekReviewOpen] = useState(false);
+  const weekFridayAutoRef = useRef(false);
 
   useEffect(() => {
     const id = window.setInterval(() => setDateTick((n) => n + 1), 60_000);
@@ -116,6 +145,71 @@ export default function Home() {
     const id = window.setTimeout(() => setKiImportNotice(null), 5000);
     return () => window.clearTimeout(id);
   }, [kiImportNotice]);
+
+  useEffect(() => {
+    if (wasDailyBriefingShownToday()) {
+      setShowDailyBriefing(false);
+      return;
+    }
+    if (sync !== "ok") return;
+    const clock = new Date();
+    const open = tasks.filter((t) => !t.done);
+    setBriefingFaellig(open.filter((t) => isOpenDueToday(t, clock)).length);
+    setBriefingUeber(open.filter((t) => isOpenOverdue(t, clock)).length);
+    setShowDailyBriefing(true);
+  }, [sync, tasks]);
+
+  useEffect(() => {
+    if (!showDailyBriefing || wasDailyBriefingShownToday()) return;
+    if (briefingAkquiseFetched.current) return;
+    briefingAkquiseFetched.current = true;
+    let cancelled = false;
+    (async () => {
+      try {
+        const sb = getSupabase();
+        const { data, error } = await sb
+          .from("akquise_log")
+          .select("created_at")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) throw new Error(error.message);
+        const row = data as { created_at?: string } | null;
+        if (!row?.created_at) {
+          setBriefingAkquiseNie(true);
+          setBriefingAkquiseTage(null);
+        } else {
+          setBriefingAkquiseNie(false);
+          setBriefingAkquiseTage(
+            calendarDaysSinceIsoLocalMidnight(row.created_at)
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setBriefingAkquiseNie(true);
+          setBriefingAkquiseTage(null);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [showDailyBriefing]);
+
+  useEffect(() => {
+    if (sync !== "ok") return;
+    const now = new Date();
+    if (!isFridayLocal(now)) {
+      weekFridayAutoRef.current = false;
+      return;
+    }
+    const key = isoWeekKey(now);
+    if (wasWeekReviewShownForKey(key)) return;
+    if (weekFridayAutoRef.current) return;
+    weekFridayAutoRef.current = true;
+    setWeekReviewOpen(true);
+  }, [sync, dateTick]);
 
   const datumMobile = useMemo(
     () => formatDatumMobileHeader(new Date()),
@@ -393,6 +487,11 @@ export default function Home() {
     });
   }
 
+  const handleWeekReviewClose = useCallback(() => {
+    markWeekReviewShownForKey(isoWeekKey(new Date()));
+    setWeekReviewOpen(false);
+  }, []);
+
   const busy = sync === "syncing";
 
   const kiImportBtnClass =
@@ -469,6 +568,15 @@ export default function Home() {
             >
               {kiImportNotice}
             </p>
+          ) : null}
+          {showDailyBriefing ? (
+            <DailyBriefingBanner
+              faelligHeute={briefingFaellig}
+              ueberfaellig={briefingUeber}
+              akquiseTageSeit={briefingAkquiseTage}
+              akquiseNie={briefingAkquiseNie}
+              onConsumed={() => setShowDailyBriefing(false)}
+            />
           ) : null}
 
           <section className="grid w-full max-w-full shrink-0 grid-cols-3 gap-2 md:gap-3">
@@ -679,6 +787,7 @@ export default function Home() {
         disabled={busy}
         onImport={runKiImport}
       />
+      <WeekReviewModal open={weekReviewOpen} onClose={handleWeekReviewClose} />
     </div>
   );
 }
