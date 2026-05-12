@@ -173,10 +173,16 @@ export function TaskItem({
     setBereichIdDraft(task.bereich_id);
     setDeadlineDraft(normalizeDeadline(task.deadline));
     setKundeDraft(task.kunde ?? "");
+    setNotizDraft(task.notiz ?? "");
     setEditOpen(true);
   }
 
   function cancelEdit() {
+    setTextDraft(task.text);
+    setBereichIdDraft(task.bereich_id);
+    setDeadlineDraft(normalizeDeadline(task.deadline));
+    setKundeDraft(task.kunde ?? "");
+    setNotizDraft(task.notiz ?? "");
     setEditOpen(false);
   }
 
@@ -188,6 +194,7 @@ export function TaskItem({
       const sb = getSupabase();
       const now = new Date().toISOString();
       const kundeVal = kundeDraft.trim() || null;
+      const notizVal = notizDraft.trim() || null;
       const { error } = await sb
         .from("tasks")
         .update({
@@ -195,6 +202,7 @@ export function TaskItem({
           bereich_id: bereichIdDraft,
           deadline: deadlineDraft,
           kunde: kundeVal,
+          notiz: notizVal,
           updated_at: now,
         })
         .eq("id", task.id);
@@ -205,6 +213,7 @@ export function TaskItem({
         bereich_id: bereichIdDraft,
         deadline: deadlineDraft,
         kunde: kundeVal,
+        notiz: notizVal,
         updated_at: now,
       };
       onTaskUpdated(taskWithBereichJoin(base, bereiche));
@@ -214,6 +223,7 @@ export function TaskItem({
       setBereichIdDraft(task.bereich_id);
       setDeadlineDraft(normalizeDeadline(task.deadline));
       setKundeDraft(task.kunde ?? "");
+      setNotizDraft(task.notiz ?? "");
     } finally {
       setEditBusy(false);
     }
@@ -404,7 +414,7 @@ export function TaskItem({
         </span>
       </button>
 
-      <div className="relative min-w-0 flex-1 pr-1 md:pr-11">
+      <div className="relative min-w-0 flex-1 pr-10 md:pr-11">
         <div className="flex min-w-0 items-start gap-2">
           <span
             className="mt-[0.42rem] shrink-0 rounded-full"
@@ -416,9 +426,23 @@ export function TaskItem({
             aria-hidden
           />
           <div className="min-w-0 flex-1">
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => {
+                if (!disabled) openEditModal();
+              }}
+              className={[
+                "tap-scale w-full text-left md:hidden break-words font-sans text-sm leading-snug text-fg transition-[opacity,text-decoration-color] duration-300 ease-out disabled:pointer-events-none disabled:opacity-40",
+                done ? "line-through" : "",
+              ].join(" ")}
+              aria-label="Aufgabe bearbeiten"
+            >
+              {task.text}
+            </button>
             <p
               className={[
-                "break-words font-sans text-sm leading-snug text-fg transition-[opacity,text-decoration-color] duration-300 ease-out",
+                "hidden break-words font-sans text-sm leading-snug text-fg transition-[opacity,text-decoration-color] duration-300 ease-out md:block",
                 done ? "line-through" : "",
               ].join(" ")}
             >
@@ -552,7 +576,7 @@ export function TaskItem({
               openEditModal();
             }}
             aria-label="Aufgabe bearbeiten"
-            className="tap-scale flex h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent disabled:opacity-40"
+            className="tap-scale hidden h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent disabled:opacity-40 md:flex"
           >
             <svg
               className="h-4 w-4"
@@ -575,7 +599,7 @@ export function TaskItem({
               skipBlurSave.current = false;
             }}
             aria-label="Notiz bearbeiten"
-            className="tap-scale flex h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
+            className="tap-scale hidden h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent md:flex"
           >
             <svg
               className="h-4 w-4"
@@ -599,7 +623,7 @@ export function TaskItem({
                 handleIcsDownload();
               }}
               aria-label="Kalender exportieren"
-              className="tap-scale flex h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
+              className="tap-scale hidden h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent md:flex"
             >
               <svg
                 className="h-4 w-4"
@@ -712,6 +736,29 @@ export function TaskItem({
                       ))}
                     </select>
                   </label>
+                  <label className="mt-4 block">
+                    <span className="ui-label-upper">Notiz (optional)</span>
+                    <textarea
+                      value={notizDraft}
+                      onChange={(e) => setNotizDraft(e.target.value)}
+                      disabled={editBusy}
+                      rows={3}
+                      placeholder="Notiz …"
+                      className="ui-textarea mt-2 w-full resize-y text-sm disabled:opacity-50"
+                    />
+                  </label>
+                  {showCal ? (
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => handleIcsDownload()}
+                        disabled={editBusy}
+                        className="ui-btn-secondary tap-scale w-full rounded-md px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide disabled:opacity-40"
+                      >
+                        Kalender (.ics)
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
                 <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-border-subtle px-5 py-4">
                   <button
