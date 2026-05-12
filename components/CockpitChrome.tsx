@@ -107,7 +107,7 @@ function CockpitNavLinks({
 
   if (variant === "side") {
     return (
-      <nav className="flex flex-col gap-0.5">
+      <nav className="flex flex-col gap-1">
         {items.map(({ href, label, Icon }) => {
           const active = isActive(pathname, href);
           const showSitesDot = label === "Sites" && sitesIndicator !== "none";
@@ -117,14 +117,12 @@ function CockpitNavLinks({
               href={href}
               title={label}
               className={[
-                "tap-scale flex h-8 items-center gap-2 rounded-md px-3 font-sans text-[13px] font-medium tracking-tight transition-[background-color,color] duration-150 ease-out",
-                active
-                  ? "bg-accent-dim text-accent"
-                  : "text-fg-muted hover:bg-surface hover:text-fg",
+                "tap-scale flex items-center gap-2 rounded-md px-2 py-1.5 font-sans text-[13px] font-medium tracking-tight transition-colors duration-150 ease-out",
+                active ? "text-accent" : "text-fg-muted hover:text-fg",
               ].join(" ")}
             >
-              <span className="relative inline-flex h-5 w-5 shrink-0 items-center justify-center text-current">
-                <Icon className="h-5 w-5" />
+              <span className="relative inline-flex shrink-0 text-current">
+                <Icon className="h-[18px] w-[18px]" aria-hidden />
                 {showSitesDot ? sitesDot : null}
               </span>
               {label}
@@ -196,11 +194,11 @@ export function CockpitChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-full flex-col overflow-x-hidden overflow-y-hidden bg-bg md:h-auto md:max-h-none md:min-h-[100dvh] md:flex-row md:overflow-y-auto">
-      <aside className="hidden w-[200px] shrink-0 flex-col border-r border-border-subtle bg-bg-elevated md:flex">
-        <div className="border-b border-border-subtle px-6 pb-5 pt-10">
+      <aside className="hidden w-[188px] shrink-0 flex-col border-r border-border-subtle bg-bg-elevated md:flex">
+        <div className="border-b border-border-subtle px-4 pb-4 pt-8">
           <SaraciLogo height={28} priority className="max-w-[9rem]" />
         </div>
-        <div className="px-2 py-3">
+        <div className="px-1.5 py-2">
           <CockpitNavLinks variant="side" sitesIndicator={sitesIndicator} items={navItems} />
         </div>
       </aside>

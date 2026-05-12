@@ -479,9 +479,6 @@ export default function Home() {
 
   const busy = sync === "syncing";
 
-  const kiImportBtnClass =
-    "ui-btn-secondary tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide disabled:opacity-40";
-
   return (
     <div className="flex min-h-0 w-full max-w-full flex-col overflow-x-hidden">
       <header className="shrink-0 bg-bg">
@@ -500,34 +497,36 @@ export default function Home() {
               >
                 {datumMobile}
               </time>
+              <DataExportButtons
+                variant="menu"
+                disabled={busy}
+                onKiImport={() => setKiImportOpen(true)}
+              />
               <LogoutButton variant="compact" />
             </div>
           </div>
         </div>
 
-        <div className="hidden min-h-[52px] max-w-full flex-col justify-center border-b border-border-subtle px-[max(1rem,env(safe-area-inset-left))] py-2 pr-[max(1rem,env(safe-area-inset-right))] md:flex">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <h1 className="font-sans text-lg font-medium tracking-tight text-fg md:text-xl">
-                Saraci Cockpit
-              </h1>
-              <p className="mt-0.5 font-mono text-[11px] text-fg-muted">
-                Aufgaben · Supabase
-              </p>
-            </div>
-            <div className="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-3">
-              <DataExportButtons disabled={busy} />
-              <button
-                type="button"
-                onClick={() => setKiImportOpen(true)}
-                disabled={busy}
-                className={kiImportBtnClass}
-              >
-                KI-Import
-              </button>
-              <LogoutButton />
-              <SyncDot status={sync} />
-            </div>
+        <div className="hidden h-12 max-w-full items-center border-b border-border-subtle px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] md:flex">
+          <SaraciLogo
+            height={26}
+            priority
+            className="max-h-[26px] shrink-0 object-contain"
+          />
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+            <SyncDot status={sync} />
+            <time
+              dateTime={new Date().toISOString()}
+              className="whitespace-nowrap font-mono text-xs tabular-nums text-fg-subtle"
+            >
+              {datumMobile}
+            </time>
+            <DataExportButtons
+              variant="menu"
+              disabled={busy}
+              onKiImport={() => setKiImportOpen(true)}
+            />
+            <LogoutButton />
           </div>
         </div>
       </header>
@@ -632,7 +631,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="mt-3 flex min-w-0 flex-col gap-2">
+              <div className="mt-3 flex min-w-0 flex-col divide-y divide-[#1a1a1a]">
                 {openTasks.length === 0 ? (
                   <p className="rounded-md border border-dashed border-border-subtle bg-surface/50 px-3 py-6 text-center font-sans text-sm text-fg-muted">
                     {openListFilter === "heute" && openByKunde.length > 0
@@ -692,7 +691,7 @@ export default function Home() {
                         Alle erledigten löschen
                       </button>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col divide-y divide-[#1a1a1a]">
                       {doneTasks.map((t) => (
                         <TaskItem
                           key={t.id}

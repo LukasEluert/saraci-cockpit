@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   backupDateStamp,
   buildTasksCsv,
@@ -30,15 +30,20 @@ const iconBtnClass =
 
 type Props = {
   disabled?: boolean;
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "menu";
+  /** Nur bei variant="menu": KI-Import öffnen */
+  onKiImport?: () => void;
 };
 
 export function DataExportButtons({
   disabled = false,
   variant = "default",
+  onKiImport,
 }: Props) {
   const [busy, setBusy] = useState<"json" | "csv" | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   async function run(kind: "json" | "csv") {
     setLocalError(null);
@@ -68,6 +73,93 @@ export function DataExportButtons({
   }
 
   const blocked = disabled || busy !== null;
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDoc(e: MouseEvent) {
+      const el = menuRef.current;
+      if (el && !el.contains(e.target as Node)) setMenuOpen(false);
+    }
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [menuOpen]);
+
+  if (variant === "menu") {
+    return (
+      <div className="relative shrink-0" ref={menuRef}>
+        <button
+          type="button"
+          aria-expanded={menuOpen}
+          aria-haspopup="menu"
+          aria-label="Weitere Aktionen"
+          disabled={blocked}
+          onClick={() => setMenuOpen((o) => !o)}
+          className="tap-scale flex h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-colors duration-100 ease-out hover:bg-surface-hover hover:text-fg disabled:opacity-40 md:h-10 md:w-10"
+        >
+          <span className="font-mono text-lg leading-none" aria-hidden>
+            ···
+          </span>
+        </button>
+        {menuOpen ? (
+          <div
+            className="absolute right-0 top-full z-50 mt-1 min-w-[11rem] rounded-md border border-border bg-bg-elevated py-1 shadow-[var(--modal-shadow)]"
+            role="menu"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              disabled={blocked}
+              className="flex w-full px-3 py-2 text-left font-mono text-[11px] uppercase tracking-wide text-fg transition-colors duration-100 hover:bg-surface disabled:opacity-40"
+              onClick={() => {
+                void run("json");
+                setMenuOpen(false);
+              }}
+            >
+              {busy === "json" ? "Lade …" : "Export JSON"}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={blocked}
+              className="flex w-full px-3 py-2 text-left font-mono text-[11px] uppercase tracking-wide text-fg transition-colors duration-100 hover:bg-surface disabled:opacity-40"
+              onClick={() => {
+                void run("csv");
+                setMenuOpen(false);
+              }}
+            >
+              {busy === "csv" ? "Lade …" : "Export CSV"}
+            </button>
+            {onKiImport ? (
+              <button
+                type="button"
+                role="menuitem"
+                disabled={blocked}
+                className="flex w-full border-t border-border-subtle px-3 py-2 text-left font-mono text-[11px] uppercase tracking-wide text-fg transition-colors duration-100 hover:bg-surface disabled:opacity-40"
+                onClick={() => {
+                  onKiImport();
+                  setMenuOpen(false);
+                }}
+              >
+                KI-Import
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+        {localError ? (
+          <span className="sr-only" role="status">
+            {localError}
+          </span>
+        ) : null}
+      </div>
+    );
+  }
 
   if (variant === "compact") {
     return (
@@ -105,10 +197,7 @@ export function DataExportButtons({
           </svg>
         </button>
         {localError ? (
-          <span
-            className="sr-only"
-            role="status"
-          >
+          <span className="sr-only" role="status">
             {localError}
           </span>
         ) : null}

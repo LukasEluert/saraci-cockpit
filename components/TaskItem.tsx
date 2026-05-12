@@ -243,13 +243,6 @@ export function TaskItem({
 
   const showKunde = Boolean(task.kunde?.trim());
 
-  const leftAccent: import("react").CSSProperties = {
-    borderLeftWidth: 3,
-    borderLeftColor: farbe,
-    borderTopLeftRadius: "8px",
-    borderBottomLeftRadius: "8px",
-  };
-
   const modalBereichSelectChildren = (
     <>
       {bereichIdDraft &&
@@ -325,23 +318,22 @@ export function TaskItem({
     }, 200);
   }
 
-  const cardClass = [
-    "group flex max-w-full gap-2 rounded-lg border border-border-subtle bg-surface py-2.5 pl-3 pr-2 shadow-[var(--stat-inset)] transition-[border-color,background-color,opacity] duration-100 ease-out hover:border-border hover:bg-surface-hover md:gap-3 md:px-3",
-    done ? "opacity-50 transition-opacity duration-300" : "",
+  const rowClass = [
+    "group/task relative flex w-full max-w-full items-start gap-3 py-3 pl-0.5 pr-0 transition-opacity duration-300 ease-out md:pr-1",
+    done ? "opacity-50" : "",
   ].join(" ");
 
   const swipeActive = swipeLayout && !disabled && !done;
   const progressRight = swipeActive ? Math.min(1, Math.max(0, swipeX / SWIPE_COMMIT)) : 0;
   const progressLeft = swipeActive ? Math.min(1, Math.max(0, -swipeX / SWIPE_COMMIT)) : 0;
 
-  const cardTransformStyle: import("react").CSSProperties = swipeActive
+  const swipeTransformStyle: import("react").CSSProperties = swipeActive
     ? {
-        ...leftAccent,
         transform: `translateX(${swipeX}px)`,
         transition: swipeAnimating ? "transform 0.2s ease-out" : "none",
         touchAction: "pan-y",
       }
-    : leftAccent;
+    : {};
 
   function onSwipeTouchStart(e: React.TouchEvent) {
     if (!swipeActive) return;
@@ -382,7 +374,7 @@ export function TaskItem({
         type="button"
         onClick={() => onToggle(task)}
         aria-label={done ? "Als offen markieren" : "Als erledigt markieren"}
-        className="tap-scale flex h-10 w-10 shrink-0 items-center justify-center self-start rounded-md border border-transparent hover:border-border"
+        className="tap-scale flex h-9 w-9 shrink-0 items-center justify-center self-start rounded-md border border-transparent hover:border-border md:h-10 md:w-10"
       >
         <span
           className={[
@@ -411,97 +403,123 @@ export function TaskItem({
           ) : null}
         </span>
       </button>
-      <div className="min-w-0 flex-1 overflow-hidden">
-        <p
-          className={[
-            "break-words font-sans text-sm leading-snug text-fg transition-[opacity,text-decoration-color] duration-300 ease-out",
-            done ? "line-through" : "",
-          ].join(" ")}
-        >
-          {task.text}
-        </p>
-        {notizPreview(task.notiz) ? (
-          <p className="mt-1 break-words font-sans text-xs leading-snug text-fg-muted">
-            {notizPreview(task.notiz)}
-          </p>
-        ) : null}
-        <div className="mt-2 flex max-w-full flex-wrap items-center gap-1.5">
-          {showKunde ? (
-            <span className="ui-tag max-w-full gap-1 font-sans normal-case tracking-normal">
-              <svg
-                className="h-3 w-3 shrink-0 text-fg-muted"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                aria-hidden
+
+      <div className="relative min-w-0 flex-1 pr-1 md:pr-11">
+        <div className="flex min-w-0 items-start gap-2">
+          <span
+            className="mt-[0.42rem] shrink-0 rounded-full"
+            style={{
+              width: 2,
+              height: 2,
+              backgroundColor: farbe,
+            }}
+            aria-hidden
+          />
+          <div className="min-w-0 flex-1">
+            <p
+              className={[
+                "break-words font-sans text-sm leading-snug text-fg transition-[opacity,text-decoration-color] duration-300 ease-out",
+                done ? "line-through" : "",
+              ].join(" ")}
+            >
+              {task.text}
+            </p>
+
+            <div
+              className={[
+                "mt-1 flex max-w-full flex-wrap items-center gap-1.5 transition-opacity duration-[120ms]",
+                "pointer-events-none opacity-0",
+                "group-hover/task:pointer-events-auto group-hover/task:opacity-100",
+                "max-md:pointer-events-auto max-md:opacity-100",
+              ].join(" ")}
+            >
+              {notizPreview(task.notiz) ? (
+                <span className="max-w-full break-words font-sans text-[11px] leading-snug text-fg-muted">
+                  {notizPreview(task.notiz)}
+                </span>
+              ) : null}
+              {showKunde ? (
+                <span className="ui-tag max-w-full gap-1 font-sans normal-case tracking-normal">
+                  <svg
+                    className="h-3 w-3 shrink-0 text-fg-muted"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    aria-hidden
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  <span className="truncate">{(task.kunde ?? "").trim()}</span>
+                </span>
+              ) : null}
+              <button
+                type="button"
+                disabled={disabled}
+                onMouseDown={() => {
+                  skipBlurSave.current = true;
+                }}
+                onClick={() => {
+                  skipBlurSave.current = false;
+                  openEditModal();
+                }}
+                className={[
+                  "tap-scale ui-tag pointer-events-auto cursor-pointer font-mono transition-opacity duration-100 hover:opacity-90 disabled:pointer-events-none disabled:opacity-40",
+                  deadlineBadgeClass(task.deadline),
+                ].join(" ")}
+                aria-label="Deadline ändern"
               >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              <span className="truncate">{(task.kunde ?? "").trim()}</span>
-            </span>
-          ) : null}
-          <button
-            type="button"
-            disabled={disabled}
-            onMouseDown={() => {
-              skipBlurSave.current = true;
-            }}
-            onClick={() => {
-              skipBlurSave.current = false;
-              openEditModal();
-            }}
-            className="tap-scale ui-tag max-w-full cursor-pointer font-mono normal-case tracking-wide transition-opacity duration-100 hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-            style={bereichBadgeStyle(farbe)}
-            aria-label="Bereich ändern"
-          >
-            <span className="truncate">{bereichName}</span>
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onMouseDown={() => {
-              skipBlurSave.current = true;
-            }}
-            onClick={() => {
-              skipBlurSave.current = false;
-              openEditModal();
-            }}
-            className={[
-              "tap-scale ui-tag inline-flex cursor-pointer font-mono transition-opacity duration-100 hover:opacity-90 disabled:pointer-events-none disabled:opacity-40",
-              deadlineBadgeClass(task.deadline),
-            ].join(" ")}
-            aria-label="Deadline ändern"
-          >
-            {task.deadline?.trim() || "Kein Datum"}
-          </button>
-          {showPrioritaet ? (
-            <span
-              className="ui-tag inline-flex font-mono"
-              style={prioritaetTagStyle(pNum)}
-            >
-              P{pNum}
-            </span>
-          ) : null}
-          {wieder ? (
-            <span className="ui-tag inline-flex font-mono text-fg-muted">
-              {(task.wiederholung as Wiederholung) ?? ""}
-            </span>
-          ) : null}
-          {showAktualisiert ? (
-            <span
-              className="ui-tag inline-flex font-mono tracking-wide text-fg-muted"
-              style={{
-                borderColor: "var(--border)",
-                color: "var(--text-tertiary)",
-                backgroundColor: "var(--surface-hover)",
-              }}
-            >
-              {aktualisiertText}
-            </span>
-          ) : null}
+                {task.deadline?.trim() || "Kein Datum"}
+              </button>
+              {showPrioritaet ? (
+                <span
+                  className="ui-tag inline-flex font-mono"
+                  style={prioritaetTagStyle(pNum)}
+                >
+                  P{pNum}
+                </span>
+              ) : null}
+              {wieder ? (
+                <span className="ui-tag inline-flex font-mono text-fg-muted">
+                  {(task.wiederholung as Wiederholung) ?? ""}
+                </span>
+              ) : null}
+              {showAktualisiert ? (
+                <span
+                  className="ui-tag inline-flex font-mono tracking-wide text-fg-muted"
+                  style={{
+                    borderColor: "var(--border)",
+                    color: "var(--text-tertiary)",
+                    backgroundColor: "var(--surface-hover)",
+                  }}
+                >
+                  {aktualisiertText}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-1.5">
+              <button
+                type="button"
+                disabled={disabled}
+                onMouseDown={() => {
+                  skipBlurSave.current = true;
+                }}
+                onClick={() => {
+                  skipBlurSave.current = false;
+                  openEditModal();
+                }}
+                className="tap-scale ui-tag max-w-full cursor-pointer font-mono normal-case tracking-wide transition-opacity duration-100 hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+                style={bereichBadgeStyle(farbe)}
+                aria-label="Bereich ändern"
+              >
+                <span className="truncate">{bereichName}</span>
+              </button>
+            </div>
+          </div>
         </div>
+
         {notizOpen ? (
           <textarea
             value={notizDraft}
@@ -514,9 +532,15 @@ export function TaskItem({
             className="ui-textarea mt-3 w-full max-w-full resize-y text-sm disabled:opacity-50"
           />
         ) : null}
-      </div>
-      <div className="flex shrink-0 flex-col items-end gap-1 self-start">
-        <div className="flex items-center gap-0.5">
+
+        <div
+          className={[
+            "absolute right-0 top-2 z-[1] flex items-center gap-0.5",
+            "md:pointer-events-none md:opacity-0 md:transition-opacity md:duration-[120ms]",
+            "md:group-hover/task:pointer-events-auto md:group-hover/task:opacity-100",
+            "md:group-focus-within/task:pointer-events-auto md:group-focus-within/task:opacity-100",
+          ].join(" ")}
+        >
           <button
             type="button"
             disabled={disabled}
@@ -528,7 +552,7 @@ export function TaskItem({
               openEditModal();
             }}
             aria-label="Aufgabe bearbeiten"
-            className="tap-scale flex h-10 w-10 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent disabled:opacity-40"
+            className="tap-scale flex h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent disabled:opacity-40"
           >
             <svg
               className="h-4 w-4"
@@ -551,7 +575,7 @@ export function TaskItem({
               skipBlurSave.current = false;
             }}
             aria-label="Notiz bearbeiten"
-            className="tap-scale flex h-10 w-10 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
+            className="tap-scale flex h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
           >
             <svg
               className="h-4 w-4"
@@ -575,7 +599,7 @@ export function TaskItem({
                 handleIcsDownload();
               }}
               aria-label="Kalender exportieren"
-              className="tap-scale flex h-10 w-10 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
+              className="tap-scale flex h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
             >
               <svg
                 className="h-4 w-4"
@@ -590,14 +614,24 @@ export function TaskItem({
               </svg>
             </button>
           ) : null}
+          <button
+            type="button"
+            onClick={() => onDelete(task)}
+            aria-label="Löschen"
+            className="tap-scale flex h-9 w-9 items-center justify-center rounded-md text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
+          >
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              aria-hidden
+            >
+              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14ZM10 11v6M14 11v6" />
+            </svg>
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => onDelete(task)}
-          className="tap-scale flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md px-2 font-mono text-[11px] text-fg-muted transition-[background-color,color] duration-100 ease-out hover:bg-surface-hover hover:text-accent"
-        >
-          Löschen
-        </button>
       </div>
     </>
   );
@@ -708,7 +742,7 @@ export function TaskItem({
       {swipeActive ? (
         <div
           ref={swipeWrapRef}
-          className="relative max-w-full overflow-hidden rounded-lg"
+          className="relative max-w-full overflow-hidden"
           style={{ touchAction: "pan-y" }}
           onTouchStart={onSwipeTouchStart}
           onTouchMove={onSwipeTouchMove}
@@ -733,7 +767,7 @@ export function TaskItem({
             </div>
           </div>
           <div className="relative z-10">
-            <div className={cardClass} style={cardTransformStyle}>
+            <div className={rowClass} style={swipeTransformStyle}>
               {innerCard}
             </div>
           </div>
@@ -747,9 +781,7 @@ export function TaskItem({
           ) : null}
         </div>
       ) : (
-        <div className={cardClass} style={leftAccent}>
-          {innerCard}
-        </div>
+        <div className={rowClass}>{innerCard}</div>
       )}
       {editModal}
     </>
