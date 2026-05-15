@@ -6,8 +6,10 @@ import { markDailyBriefingShownToday } from "@/lib/briefingStorage";
 type Props = {
   faelligHeute: number;
   ueberfaellig: number;
-  akquiseTageSeit: number | null;
-  akquiseNie: boolean;
+  akquiseTageSeit?: number | null;
+  akquiseNie?: boolean;
+  /** Nur Aufgaben-Zahlen, ohne Akquise-Zeile (Saraci Desk) */
+  hideAkquise?: boolean;
   onConsumed: () => void;
 };
 
@@ -16,6 +18,7 @@ export function DailyBriefingBanner({
   ueberfaellig,
   akquiseTageSeit,
   akquiseNie,
+  hideAkquise = false,
   onConsumed,
 }: Props) {
   const [visible, setVisible] = useState(true);
@@ -38,15 +41,18 @@ export function DailyBriefingBanner({
 
   if (!visible) return null;
 
-  const akquiseTeil = akquiseNie
-    ? "noch keine Akquise"
-    : akquiseTageSeit === null
-      ? "Akquise unbekannt"
-      : akquiseTageSeit === 0
-        ? "Letzte Akquise heute"
-        : akquiseTageSeit === 1
-          ? "Letzte Akquise vor 1 Tag"
-          : `Letzte Akquise vor ${akquiseTageSeit} Tagen`;
+  const akquiseTeil =
+    hideAkquise || akquiseTageSeit === undefined
+      ? null
+      : akquiseNie
+        ? "noch keine Akquise"
+        : akquiseTageSeit === null
+          ? "Akquise unbekannt"
+          : akquiseTageSeit === 0
+            ? "Letzte Akquise heute"
+            : akquiseTageSeit === 1
+              ? "Letzte Akquise vor 1 Tag"
+              : `Letzte Akquise vor ${akquiseTageSeit} Tagen`;
 
   return (
     <div
@@ -66,7 +72,8 @@ export function DailyBriefingBanner({
         <p className="min-w-0 font-mono text-[11px] leading-snug text-fg md:text-[12px]">
           <span className="text-accent">Heute:</span>{" "}
           {faelligHeute} {faelligHeute === 1 ? "Task" : "Tasks"} fällig ·{" "}
-          {ueberfaellig} überfällig · {akquiseTeil}
+          {ueberfaellig} überfällig
+          {akquiseTeil ? <> · {akquiseTeil}</> : null}
         </p>
       </div>
       <button

@@ -1,6 +1,6 @@
 {
-  "name": "Saraci Cockpit",
-  "short_name": "Cockpit",
+  "name": "Saraci Desk",
+  "short_name": "Desk",
   "description": "Aufgaben mit Bereichen, Deadlines und Supabase-Sync.",
   "id": "/",
   "start_url": "/",

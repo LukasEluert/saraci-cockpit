@@ -3,13 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DuplicateTasksPanel } from "@/components/DuplicateTasksPanel";
+import { LogoutButton } from "@/components/LogoutButton";
 import { getSupabase } from "@/lib/supabase";
-import {
-  readShowAkquise,
-  readShowProjekte,
-  writeShowAkquise,
-  writeShowProjekte,
-} from "@/lib/navPreferences";
 import { ensureDefaultBereiche } from "@/lib/seedBereiche";
 import type { BereichRow } from "@/lib/types";
 
@@ -18,8 +13,6 @@ export default function EinstellungenPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [showAkquise, setShowAkquise] = useState(true);
-  const [showProjekte, setShowProjekte] = useState(true);
 
   const [newName, setNewName] = useState("");
   const [newFarbe, setNewFarbe] = useState("#e63030");
@@ -47,11 +40,6 @@ export default function EinstellungenPage() {
   useEffect(() => {
     void load();
   }, [load]);
-
-  useEffect(() => {
-    setShowAkquise(readShowAkquise());
-    setShowProjekte(readShowProjekte());
-  }, []);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -143,7 +131,7 @@ export default function EinstellungenPage() {
             Einstellungen
           </h1>
           <p className="mt-1 font-mono text-[11px] text-fg-muted">
-            Bereiche verwalten
+            Saraci Desk · Bereiche und Datenpflege
           </p>
         </header>
 
@@ -157,58 +145,48 @@ export default function EinstellungenPage() {
           <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
             Navigation
           </h2>
-          <p className="mt-2 font-sans text-[13px] text-fg-muted">
-            Ausgeblendete Bereiche erscheinen nicht in der Sidebar und in der
-            mobilen unteren Navigation.
+          <p className="mt-2 font-sans text-[13px] leading-relaxed text-fg-muted">
+            Saraci Desk zeigt eine feste Hauptnavigation (Heute, Aufgaben,
+            Woche, Briefing, Review, Dashboard, Import / Export,
+            Einstellungen). Ältere Bereiche wie Akquise, Projekte und Sites
+            bleiben im Code erhalten, sind hier aber nicht eingebunden — sie
+            gehören künftig zu anderen Saraci-Produkten (z.&nbsp;B. Saraci
+            Core).
           </p>
-          <div className="mt-4 space-y-3">
-            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border-subtle bg-bg px-3 py-3">
-              <span className="font-mono text-[12px] uppercase tracking-wide text-fg">
-                Akquise anzeigen
-              </span>
-              <input
-                type="checkbox"
-                checked={showAkquise}
-                onChange={(e) => {
-                  const v = e.target.checked;
-                  setShowAkquise(v);
-                  writeShowAkquise(v);
-                }}
-                className="h-4 w-4 shrink-0 rounded border-border bg-surface text-accent focus:ring-accent/30"
-              />
-            </label>
-            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border-subtle bg-bg px-3 py-3">
-              <span className="font-mono text-[12px] uppercase tracking-wide text-fg">
-                Projekte anzeigen
-              </span>
-              <input
-                type="checkbox"
-                checked={showProjekte}
-                onChange={(e) => {
-                  const v = e.target.checked;
-                  setShowProjekte(v);
-                  writeShowProjekte(v);
-                }}
-                className="h-4 w-4 shrink-0 rounded border-border bg-surface text-accent focus:ring-accent/30"
-              />
-            </label>
-          </div>
         </section>
 
         <section className="rounded-xl border border-border-subtle bg-surface p-4">
           <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
-            Wochenrückblick
+            Review &amp; erledigte Tasks
           </h2>
           <p className="mt-2 font-sans text-[13px] text-fg-muted">
-            Auswertung der aktuellen Kalenderwoche: erledigte und offene Tasks,
-            Akquise und Motivation.
+            Wöchentliches Review der Tasks:
           </p>
           <Link
-            href="/wochenrueckblick"
+            href="/review"
             className="mt-4 inline-flex rounded-lg border border-border px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-fg transition-colors hover:border-accent hover:text-white"
           >
-            Wochenrückblick anzeigen
+            Review öffnen
           </Link>
+          <p className="mt-4 font-sans text-[13px] leading-relaxed text-fg-muted">
+            Alle erledigten Aufgaben unwiderruflich löschen:{" "}
+            <Link href="/aufgaben" className="text-accent underline-offset-2 hover:underline">
+              Aufgaben
+            </Link>{" "}
+            → „Erledigt“ aufklappen → Button „Alle erledigten löschen“.
+          </p>
+        </section>
+
+        <section className="rounded-xl border border-border-subtle bg-surface p-4">
+          <h2 className="font-mono text-[11px] uppercase tracking-wide text-fg-muted">
+            Account
+          </h2>
+          <p className="mt-2 font-sans text-[13px] text-fg-muted">
+            Abmelden beendet die Session in diesem Browser.
+          </p>
+          <div className="mt-4">
+            <LogoutButton />
+          </div>
         </section>
 
         <DuplicateTasksPanel />

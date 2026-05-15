@@ -27,6 +27,13 @@ export interface Task {
   bereiche?: TaskBereichJoin | null;
   /** Optionaler Kundenname */
   kunde?: string | null;
+  /** Optional: Herkunft für künftige Saraci-Core-Anbindung (Spalten ggf. in Supabase anlegen) */
+  source_app?: string | null;
+  source_type?: string | null;
+  source_id?: string | null;
+  source_label?: string | null;
+  generated_by?: string | null;
+  external_url?: string | null;
 }
 
 export type Wiederholung = "täglich" | "wöchentlich" | "monatlich";

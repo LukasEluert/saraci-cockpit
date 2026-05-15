@@ -86,7 +86,7 @@ export function buildTaskIcs(task: Task, bereichName: string): string {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Saraci Cockpit//DE",
+    "PRODID:-//Saraci Desk//DE",
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     `UID:${uid}`,

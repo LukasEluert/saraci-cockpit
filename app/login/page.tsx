@@ -36,7 +36,7 @@ export default function LoginPage() {
     <div className="flex min-h-[100dvh] items-center justify-center bg-bg px-[max(1rem,env(safe-area-inset-left))] py-[max(1rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="w-full max-w-sm rounded-xl border border-border-subtle bg-surface p-6">
         <h1 className="font-sans text-lg font-medium tracking-tight text-fg">
-          Saraci Cockpit
+          Saraci Desk
         </h1>
         <p className="mt-1 font-mono text-[11px] text-fg-muted">
           Anmeldung

@@ -15,14 +15,14 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Saraci Cockpit",
-  description: "Aufgaben — Bereiche, Deadlines, Supabase",
+  title: "Saraci Desk",
+  description: "Persönliche Aufgaben und Fokus — Bereiche, Deadlines, Supabase",
   manifest: "/manifest.json",
-  applicationName: "Saraci Cockpit",
+  applicationName: "Saraci Desk",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Cockpit",
+    title: "Desk",
   },
   icons: {
     icon: [{ url: "/icons/pwa-icon.svg", type: "image/svg+xml" }],
