@@ -72,7 +72,7 @@ export default function BriefingPage() {
             </button>
             <p className="mt-2 font-sans text-xs text-fg-subtle">
               Entspricht dem „Briefing geschlossen“ auf der{" "}
-              <span className="text-fg-muted">Heute</span>-Seite und gilt nur für
+              <span className="text-fg-muted">Desk</span>-Seite und gilt nur für
               heute.
             </p>
           </section>

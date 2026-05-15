@@ -146,7 +146,7 @@ export default function EinstellungenPage() {
             Navigation
           </h2>
           <p className="mt-2 font-sans text-[13px] leading-relaxed text-fg-muted">
-            Saraci Desk zeigt eine feste Hauptnavigation (Heute, Aufgaben,
+            Saraci Desk zeigt eine feste Hauptnavigation (Desk, Woche,
             Woche, Briefing, Review, Dashboard, Import / Export,
             Einstellungen). Ältere Bereiche wie Akquise, Projekte und Sites
             bleiben im Code erhalten, sind hier aber nicht eingebunden — sie
@@ -170,8 +170,8 @@ export default function EinstellungenPage() {
           </Link>
           <p className="mt-4 font-sans text-[13px] leading-relaxed text-fg-muted">
             Alle erledigten Aufgaben unwiderruflich löschen:{" "}
-            <Link href="/aufgaben" className="text-accent underline-offset-2 hover:underline">
-              Aufgaben
+            <Link href="/" className="text-accent underline-offset-2 hover:underline">
+              Desk
             </Link>{" "}
             → „Erledigt“ aufklappen → Button „Alle erledigten löschen“.
           </p>

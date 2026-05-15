@@ -8,7 +8,6 @@ import {
   IconAufgaben,
   IconBriefing,
   IconEinstellungen,
-  IconHeute,
   IconImportExport,
   IconReview,
   IconTv,
@@ -23,8 +22,7 @@ type NavItem = {
 };
 
 const NAV_DESK: readonly NavItem[] = [
-  { href: "/", label: "Heute", Icon: IconHeute },
-  { href: "/aufgaben", label: "Aufgaben", Icon: IconAufgaben },
+  { href: "/", label: "Desk", Icon: IconAufgaben },
   { href: "/woche", label: "Woche", Icon: IconWoche },
   { href: "/briefing", label: "Briefing", Icon: IconBriefing },
   {

@@ -1,20 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AddForm } from "@/components/AddForm";
-import { DailyBriefingBanner } from "@/components/DailyBriefingBanner";
 import { DeskPageHeader } from "@/components/DeskPageHeader";
 import { TaskItem } from "@/components/TaskItem";
 import { WeekReviewModal } from "@/components/WeekReviewModal";
 import { DEADLINE_ORDER } from "@/lib/constants";
-import {
-  isOpenDueToday,
-  isOpenOverdue,
-  isOpenRelevantThisWeek,
-  weekBounds,
-} from "@/lib/dashboardMetrics";
-import { wasDailyBriefingShownToday } from "@/lib/briefingStorage";
 import { useDeskTasks } from "@/hooks/useDeskTasks";
 import {
   isoWeekKey,
@@ -37,15 +28,6 @@ function formatDatumMobileHeader(d: Date): string {
   return `${wd} ${v("day")}.${v("month")}`;
 }
 
-function formatDatumLong(d: Date): string {
-  return new Intl.DateTimeFormat("de-DE", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(d);
-}
-
 function prioritySortKey(p: number | null | undefined): number {
   if (p === null || p === undefined) return 1_000_000_000;
   return p;
@@ -65,7 +47,13 @@ function sortOpenTasks(list: Task[]): Task[] {
   });
 }
 
-export default function HeutePage() {
+export default function DeskHomePage() {
+  const [dateTick, setDateTick] = useState(0);
+  const [openListFilter, setOpenListFilter] = useState<"all" | "heute">("all");
+  const [kundeFilter, setKundeFilter] = useState("");
+  const [weekReviewOpen, setWeekReviewOpen] = useState(false);
+  const weekFridayAutoRef = useRef(false);
+
   const {
     bereiche,
     tasks,
@@ -75,35 +63,15 @@ export default function HeutePage() {
     handleAdd,
     handleToggle,
     handleDelete,
+    handleDeleteAllDone,
     handleNotizSaved,
     handleTaskUpdated,
   } = useDeskTasks();
-
-  const [dateTick, setDateTick] = useState(0);
-  const [showDailyBriefing, setShowDailyBriefing] = useState(false);
-  const [briefingFaellig, setBriefingFaellig] = useState(0);
-  const [briefingUeber, setBriefingUeber] = useState(0);
-  const [weekReviewOpen, setWeekReviewOpen] = useState(false);
-  const weekFridayAutoRef = useRef(false);
-
-  const clock = useMemo(() => new Date(), [dateTick]);
 
   useEffect(() => {
     const id = window.setInterval(() => setDateTick((n) => n + 1), 60_000);
     return () => window.clearInterval(id);
   }, []);
-
-  useEffect(() => {
-    if (wasDailyBriefingShownToday()) {
-      setShowDailyBriefing(false);
-      return;
-    }
-    if (sync !== "ok") return;
-    const open = tasks.filter((t) => !t.done);
-    setBriefingFaellig(open.filter((t) => isOpenDueToday(t, clock)).length);
-    setBriefingUeber(open.filter((t) => isOpenOverdue(t, clock)).length);
-    setShowDailyBriefing(true);
-  }, [sync, tasks, clock]);
 
   useEffect(() => {
     if (sync !== "ok") return;
@@ -123,52 +91,56 @@ export default function HeutePage() {
     () => formatDatumMobileHeader(new Date()),
     [dateTick]
   );
-  const datumLong = useMemo(() => formatDatumLong(new Date()), [dateTick]);
+
+  const stats = useMemo(() => {
+    const open = tasks.filter((t) => !t.done);
+    const heute = open.filter(
+      (t) => (t.deadline?.trim() || "") === "Heute"
+    ).length;
+    const woche = open.filter((t) => {
+      const d = t.deadline?.trim() || "";
+      return d === "Heute" || d === "Diese Woche";
+    }).length;
+    return { offen: open.length, heute, woche };
+  }, [tasks]);
+
+  const kundeOptions = useMemo(() => {
+    const s = new Set<string>();
+    for (const t of tasks) {
+      const k = t.kunde?.trim();
+      if (k) s.add(k);
+    }
+    return [...s].sort((a, b) => a.localeCompare(b, "de"));
+  }, [tasks]);
 
   const sortedOpenTasks = useMemo(
     () => sortOpenTasks(tasks.filter((t) => !t.done)),
     [tasks]
   );
-
-  const { start: weekStart, end: weekEnd } = useMemo(
-    () => weekBounds(clock),
-    [clock]
-  );
-
-  const stats = useMemo(() => {
-    const open = tasks.filter((t) => !t.done);
-    const ueber = open.filter((t) => isOpenOverdue(t, clock)).length;
-    const heute = open.filter((t) => isOpenDueToday(t, clock)).length;
-    const woche = open.filter((t) =>
-      isOpenRelevantThisWeek(t, weekStart, weekEnd)
-    ).length;
-    return { offen: open.length, ueber, heute, woche };
-  }, [tasks, clock, weekStart, weekEnd]);
-
-  const jetztDran = useMemo(() => {
-    const focus = sortedOpenTasks.filter(
-      (t) => isOpenOverdue(t, clock) || isOpenDueToday(t, clock)
-    );
-    const set = new Map<string, Task>();
-    for (const t of focus) set.set(t.id, t);
-    return [...set.values()].sort((a, b) => {
-      const oa = isOpenOverdue(a, clock) ? 0 : 1;
-      const ob = isOpenOverdue(b, clock) ? 0 : 1;
-      if (oa !== ob) return oa - ob;
-      const da = a.nächste_fälligkeit || "";
-      const db = b.nächste_fälligkeit || "";
-      return da.localeCompare(db);
-    });
-  }, [sortedOpenTasks, clock]);
-
-  const spaeterWoche = useMemo(() => {
+  const openByKunde = useMemo(() => {
+    if (!kundeFilter) return sortedOpenTasks;
     return sortedOpenTasks.filter(
-      (t) =>
-        isOpenRelevantThisWeek(t, weekStart, weekEnd) &&
-        !isOpenOverdue(t, clock) &&
-        !isOpenDueToday(t, clock)
+      (t) => (t.kunde?.trim() || "") === kundeFilter
     );
-  }, [sortedOpenTasks, weekStart, weekEnd, clock]);
+  }, [sortedOpenTasks, kundeFilter]);
+  const openTasks = useMemo(() => {
+    if (openListFilter === "heute") {
+      return openByKunde.filter((t) => (t.deadline?.trim() || "") === "Heute");
+    }
+    return openByKunde;
+  }, [openByKunde, openListFilter]);
+
+  const doneTasks = useMemo(
+    () =>
+      tasks
+        .filter((t) => t.done)
+        .sort(
+          (a, b) =>
+            new Date(b.updated_at).getTime() -
+            new Date(a.updated_at).getTime()
+        ),
+    [tasks]
+  );
 
   const handleWeekReviewClose = useCallback(() => {
     markWeekReviewShownForKey(isoWeekKey(new Date()));
@@ -180,17 +152,13 @@ export default function HeutePage() {
       <DeskPageHeader sync={sync} datumMobile={datumMobile} busy={busy} />
 
       <div className="flex min-h-0 flex-col overflow-x-hidden px-[max(0.75rem,env(safe-area-inset-left))] pb-[calc(76px+env(safe-area-inset-bottom,0px))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-3 max-md:flex-none md:flex-1 md:min-h-0 md:px-[max(1rem,env(safe-area-inset-left))] md:pb-8 md:pr-[max(1rem,env(safe-area-inset-right))] md:pt-4">
-        <div className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-4 md:max-w-lg md:gap-6">
+        <div className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-4 md:max-w-lg md:gap-8">
           <header className="min-w-0 shrink-0">
             <h1 className="font-sans text-xl font-medium tracking-tight text-fg md:text-2xl">
-              Heute
+              Desk
             </h1>
-            <p className="mt-1 font-mono text-[12px] text-fg-muted md:text-[13px]">
-              {datumLong}
-            </p>
-            <p className="mt-2 font-sans text-sm leading-snug text-fg-subtle">
-              Dein Tagesfokus: zuerst Überfälliges und Heute-Fälliges — der Rest
-              der Woche darunter.
+            <p className="mt-1 font-mono text-[11px] text-fg-muted">
+              Aufgaben · Übersicht und Liste
             </p>
           </header>
 
@@ -200,23 +168,10 @@ export default function HeutePage() {
             </p>
           ) : null}
 
-          {showDailyBriefing ? (
-            <DailyBriefingBanner
-              faelligHeute={briefingFaellig}
-              ueberfaellig={briefingUeber}
-              hideAkquise
-              onConsumed={() => setShowDailyBriefing(false)}
-            />
-          ) : null}
-
-          <section className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+          <section className="grid w-full max-w-full shrink-0 grid-cols-3 gap-2 md:gap-3">
             <div className="ui-stat-card min-w-0">
               <p className="ui-stat-value">{stats.offen}</p>
               <p className="ui-stat-label">Offen</p>
-            </div>
-            <div className="ui-stat-card min-w-0">
-              <p className="ui-stat-value text-accent">{stats.ueber}</p>
-              <p className="ui-stat-label">Überfällig</p>
             </div>
             <div className="ui-stat-card min-w-0">
               <p className="ui-stat-value text-accent">{stats.heute}</p>
@@ -232,60 +187,144 @@ export default function HeutePage() {
             <AddForm bereiche={bereiche} disabled={busy} onAdd={handleAdd} />
           </div>
 
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="ui-label-upper">Jetzt dran</h2>
-            <Link
-              href="/aufgaben"
-              className="shrink-0 font-mono text-[11px] uppercase tracking-wide text-accent transition-colors hover:text-fg"
-            >
-              Alle Aufgaben →
-            </Link>
-          </div>
-
-          <div className="flex min-w-0 flex-col divide-y divide-[#1a1a1a]">
-            {jetztDran.length === 0 ? (
-              <p className="rounded-md border border-dashed border-border-subtle bg-surface/50 px-3 py-6 text-center font-sans text-sm text-fg-muted">
-                Nichts Überfälliges oder für heute — Ruhe oder nacharbeiten auf{" "}
-                <Link href="/aufgaben" className="text-accent underline-offset-2 hover:underline">
-                  Aufgaben
-                </Link>
-                .
-              </p>
-            ) : (
-              jetztDran.map((t) => (
-                <TaskItem
-                  key={t.id}
-                  task={t}
-                  bereiche={bereiche}
-                  disabled={busy}
-                  onToggle={handleToggle}
-                  onDelete={handleDelete}
-                  onNotizSaved={handleNotizSaved}
-                  onTaskUpdated={handleTaskUpdated}
-                />
-              ))
-            )}
-          </div>
-
-          {spaeterWoche.length > 0 ? (
-            <>
-              <h2 className="ui-label-upper mt-2">Später diese Woche</h2>
-              <div className="flex min-w-0 flex-col divide-y divide-[#1a1a1a]">
-                {spaeterWoche.map((t) => (
-                  <TaskItem
-                    key={t.id}
-                    task={t}
-                    bereiche={bereiche}
-                    disabled={busy}
-                    onToggle={handleToggle}
-                    onDelete={handleDelete}
-                    onNotizSaved={handleNotizSaved}
-                    onTaskUpdated={handleTaskUpdated}
-                  />
-                ))}
+          <div className="flex min-w-0 flex-col overflow-x-hidden max-md:pb-2">
+            <section className="min-w-0 shrink-0">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <h2 className="ui-label-upper">Offen</h2>
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <label className="flex min-w-0 max-w-full items-center gap-2">
+                    <span className="ui-label-upper shrink-0">Kunde</span>
+                    <select
+                      value={kundeFilter}
+                      onChange={(e) => setKundeFilter(e.target.value)}
+                      disabled={busy}
+                      className="ui-select max-w-[12rem] min-w-0 flex-1 font-sans text-[13px] disabled:opacity-40 sm:max-w-[14rem]"
+                      aria-label="Nach Kunde filtern"
+                    >
+                      <option value="">Alle Kunden</option>
+                      {kundeOptions.map((k) => (
+                        <option key={k} value={k}>
+                          {k}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div
+                    className="flex shrink-0 rounded-md border border-border bg-bg p-0.5"
+                    role="group"
+                    aria-label="Liste filtern"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenListFilter("all")}
+                      aria-pressed={openListFilter === "all"}
+                      className={[
+                        "tap-scale rounded px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-[background-color,color] duration-150 ease-out",
+                        openListFilter === "all"
+                          ? "bg-surface-hover text-fg"
+                          : "text-fg-muted hover:text-fg",
+                      ].join(" ")}
+                    >
+                      Alle
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOpenListFilter("heute")}
+                      aria-pressed={openListFilter === "heute"}
+                      className={[
+                        "tap-scale rounded px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-[background-color,color] duration-150 ease-out",
+                        openListFilter === "heute"
+                          ? "bg-accent-dim text-accent"
+                          : "text-fg-muted hover:text-fg",
+                      ].join(" ")}
+                    >
+                      Heute
+                    </button>
+                  </div>
+                </div>
               </div>
-            </>
-          ) : null}
+              <div className="mt-3 flex min-w-0 flex-col divide-y divide-[#1a1a1a]">
+                {openTasks.length === 0 ? (
+                  <p className="rounded-md border border-dashed border-border-subtle bg-surface/50 px-3 py-6 text-center font-sans text-sm text-fg-muted">
+                    {openListFilter === "heute" && openByKunde.length > 0
+                      ? "Keine offenen Tasks mit Deadline „Heute“."
+                      : kundeFilter &&
+                          sortedOpenTasks.length > 0 &&
+                          openByKunde.length === 0
+                        ? `Keine offenen Tasks für „${kundeFilter}“.`
+                        : "Nichts Offenes — gute Arbeit."}
+                  </p>
+                ) : (
+                  openTasks.map((t) => (
+                    <TaskItem
+                      key={t.id}
+                      task={t}
+                      bereiche={bereiche}
+                      disabled={busy}
+                      onToggle={handleToggle}
+                      onDelete={handleDelete}
+                      onNotizSaved={handleNotizSaved}
+                      onTaskUpdated={handleTaskUpdated}
+                    />
+                  ))
+                )}
+              </div>
+            </section>
+
+            <section className="mt-4 min-w-0 shrink-0">
+              <details className="group rounded-lg border border-border-subtle bg-surface transition-[border-color,background-color] duration-100 ease-out hover:border-border hover:bg-surface-hover">
+                <summary className="tap-scale cursor-pointer list-none px-4 py-3 font-mono text-[12px] uppercase tracking-wide text-fg-muted transition-colors duration-150 ease-out hover:text-fg [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center justify-between gap-2">
+                    <span>
+                      Erledigt
+                      <span className="ml-2 text-fg-subtle">
+                        ({doneTasks.length})
+                      </span>
+                    </span>
+                    <span className="text-fg-subtle transition-transform duration-150 ease-out group-open:rotate-180">
+                      ⌄
+                    </span>
+                  </span>
+                </summary>
+                <div className="border-t border-border-subtle px-3 pb-3 pt-3">
+                  {doneTasks.length === 0 ? (
+                    <p className="py-4 text-center font-sans text-sm text-fg-muted">
+                      Noch keine erledigten Aufgaben.
+                    </p>
+                  ) : (
+                    <>
+                      <div className="mb-4 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void handleDeleteAllDone(doneTasks.length)
+                          }
+                          disabled={busy}
+                          className="ui-btn-secondary tap-scale rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide disabled:opacity-40"
+                        >
+                          Alle erledigten löschen
+                        </button>
+                      </div>
+                      <div className="flex flex-col divide-y divide-[#1a1a1a]">
+                        {doneTasks.map((t) => (
+                          <TaskItem
+                            key={t.id}
+                            task={t}
+                            bereiche={bereiche}
+                            disabled={busy}
+                            onToggle={handleToggle}
+                            onDelete={handleDelete}
+                            onNotizSaved={handleNotizSaved}
+                            onTaskUpdated={handleTaskUpdated}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </details>
+            </section>
+          </div>
         </div>
       </div>
 
